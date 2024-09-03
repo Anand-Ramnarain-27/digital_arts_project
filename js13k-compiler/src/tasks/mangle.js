@@ -1,7 +1,7 @@
 'use strict';
 
-const stripComments = require('strip-comments');
-const escapeStringRegexp = require('escape-string-regexp');
+const stripComments = import('strip-comments');
+const escapeStringRegexp = import('escape-string-regexp');
 
 const encodeNumber = require('../util/encode-number');
 const analyze = require('../util/analyze');
