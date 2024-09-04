@@ -19,8 +19,8 @@ class Level {
     foundExit() {
         this.endWith(() => {
             G.menu = new Menu(
-                'SEARCHING FOR EVIL PLANS...',
-                '404 NOT FOUND'
+                'Infiltrating Core Systems…',
+                'Breach Successful'
             );
             G.menu.animateIn();
 
@@ -39,7 +39,7 @@ class Level {
     wasFound() {
         this.endWith(() => {
             G.menu = new Menu(
-                'YOU WERE FOUND!',
+                'Breach Unsuccessful',
                 'PRESS [R] TO TRY AGAIN'
             );
             G.menu.animateIn();
