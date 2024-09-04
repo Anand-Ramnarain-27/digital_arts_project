@@ -6,7 +6,10 @@ class Game {
     this.level = new Level(LEVELS[0]);
   }
 
-  cycle(e) {}
+  cycle(e) {
+    this.level.cycle(e);
+    this.render();
+  }
 
   render() {
     R.fillStyle = "#585a7f";
