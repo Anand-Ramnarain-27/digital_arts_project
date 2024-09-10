@@ -52,19 +52,53 @@ WINDOW_PATTERN = createCanvasPattern(CELL_SIZE * 2, CELL_SIZE * 2, (c, can) => {
     c.fillRect(0, 0, 999, 999);
 
     c.fillStyle = '#f29afb';
-    c.fillRect(can.width / 4, can.height / 4, can.width / 2, can.width / 2);
+    c.fillRect(can.width / 10, can.height / 4, can.width * 8 / 10, can.height / 2);
 });
 
-BUILDINGS_BACKGROUND = createCanvasPattern(800, 400, (c, can) => {
+BUILDING_PATTERN = createCanvasPattern(CELL_SIZE * LEVEL_COLS, CELL_SIZE * 8, (c, can) => {
+    c.fillStyle = '#adbbff';
+    c.fillRect(0, 0, can.width, 999);
+
+    // c.translate(CELL_SIZE / 4, CELL_SIZE / 4);
+
     c.fillStyle = WINDOW_PATTERN;
-
-    c.fillRect(
-        0,
-        0,
-        can.width,
-        can.height
-    );
+    c.fillRect(0, CELL_SIZE / 4, can.width, can.height - CELL_SIZE / 2);
 });
+
+SIGN_HOLDER_PATTERN = createCanvasPattern(CELL_SIZE * 2, CELL_SIZE * 2, (c, can) => {
+    c.fillStyle = c.strokeStyle = '#111';
+    c.lineWidth = 4;
+    c.fr(0, 0, 99, 99);
+    c.clearRect(4, 4, can.width - 8, can.height - 8);
+
+    c.beginPath();
+    c.moveTo(0, 0);
+    c.lineTo(99, 99);
+    c.moveTo(can.width, 0);
+    c.lineTo(0, can.height);
+    c.stroke();
+});
+
+createBuildingsBackground = (color, patternHeight) => createCanvasPattern(400, patternHeight, (c, can) => {
+    c.fillStyle = color;
+
+    let x = 0;
+    while (x < can.width) {
+        const buildingWidth = ~~rnd(80, 120);
+        c.fr(x, random() * 200, buildingWidth, patternHeight);
+        x += buildingWidth;
+    }
+    // for (let x = 0 ; x < can.width ; x += rnd(100, 110)) {
+    //     c.fr(x, random() * can.height * 0.8, 100, patternHeight);
+    // }
+});
+
+BUILDINGS_BACKGROUND = [
+    createBuildingsBackground('#000', 600),
+    createBuildingsBackground('#000', 500),
+    createBuildingsBackground('#000', 300)
+];
+
 
 UNPADDED_DESK = createCanvas(CELL_SIZE * 1.1, CELL_SIZE * 0.5, (c, can) => {
     // Legs
@@ -85,9 +119,6 @@ UNPADDED_DESK = createCanvas(CELL_SIZE * 1.1, CELL_SIZE * 0.5, (c, can) => {
 DESK = padCanvas(1, 2, 1, UNPADDED_DESK);
 
 LEVEL_BACKGROUND = createCanvasPattern(CELL_SIZE * 4, CELL_SIZE * 6, (c, can) => {
-    c.fillStyle = '#29c2fd';
-    c.fr(0, 0, can.width, can.height);
-
     c.fillStyle = '#000';
     c.globalAlpha = 0.05;
 

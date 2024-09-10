@@ -3,8 +3,6 @@ class Level {
         this.index = index;
         this.definition = definition;
 
-        this.windowsAlpha = 0;
-
         this.stop();
     }
 
@@ -18,9 +16,10 @@ class Level {
 
     foundExit() {
         this.endWith(() => {
+            const hasNextLevel = LEVELS[this.index + 1];
             G.menu = new Menu(
-                'SEARCHING FOR EVIL PLANS...',
-                '404 NOT FOUND'
+                'Infiltrating Core Systems. . .',
+                hasNextLevel ? 'Breach Successful' : 'Breach Successful'
             );
             G.menu.animateIn();
 
@@ -29,9 +28,11 @@ class Level {
             }, 2000);
 
             setTimeout(() => {
-                G.nextLevel();
-
-                interp(this, 'windowsAlpha', 0, 1, 0.2);
+                if (hasNextLevel) {
+                    G.nextLevel();
+                } else {    
+                    G.endAnimation();
+                }
             }, 2500);
         });
     }
@@ -39,17 +40,17 @@ class Level {
     wasFound() {
         this.endWith(() => {
             G.menu = new Menu(
-                'YOU WERE FOUND!',
-                'PRESS [R] TO TRY AGAIN'
+                nomangle('Breach Unsuccessful'),
+                nomangle('PRESS [SPACE] TO TRY AGAIN')
             );
             G.menu.animateIn();
         });
+
+        setTimeout(() => this.waitingForRetry = true, 1000);
     }
 
     start() {
         this.ended = false;
-
-        interp(this, 'windowsAlpha', 1, 0, 0.2);
 
         this.clock = 0;
 
@@ -96,7 +97,7 @@ class Level {
             this.player.spawn();
             this.cyclables.push(this.player);
             this.renderables.push(this.player);
-        }, 500);
+        }, 1000);
     }
 
     stop() {
@@ -108,11 +109,20 @@ class Level {
         this.clock += e;
 
         this.cyclables.forEach(x => x.cycle(e));
+
+        if (down[KEYBOARD_SPACE] && this.waitingForRetry) {
+            this.waitingForRetry = false;
+            G.menu.animateOut();
+
+            setTimeout(() => this.start(), 1000);
+        }
     }
 
     render() {
         // Background
         R.fillStyle = '#29c2fd';
+        fr(0, 0, LEVEL_ROWS * CELL_SIZE, LEVEL_COLS * CELL_SIZE);
+
         R.fillStyle = LEVEL_BACKGROUND;
         fr(0, 0, LEVEL_ROWS * CELL_SIZE, LEVEL_COLS * CELL_SIZE);
 
@@ -147,10 +157,6 @@ class Level {
                 }
             }
         }
-
-        R.globalAlpha = this.windowsAlpha;
-        R.fillStyle = WINDOW_PATTERN;
-        // fr(0, 0, LEVEL_ROWS * CELL_SIZE, LEVEL_COLS * CELL_SIZE);
     }
 
     particle(properties) {
