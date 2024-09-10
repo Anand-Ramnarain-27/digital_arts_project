@@ -18,7 +18,7 @@ class Level {
         this.endWith(() => {
             const hasNextLevel = LEVELS[this.index + 1];
             G.menu = new Menu(
-                nomangle( 'Infiltrating Core Systems...'),
+                nomangle('Infiltrating Core Systems...'),
                 hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
             );
             G.menu.animateIn();
@@ -110,13 +110,6 @@ class Level {
     }
 
     render() {
-        // Background
-        R.fillStyle = '#29c2fd';
-        fr(0, 0, LEVEL_ROWS * CELL_SIZE, LEVEL_COLS * CELL_SIZE);
-
-        R.fillStyle = LEVEL_BACKGROUND;
-        fr(0, 0, LEVEL_ROWS * CELL_SIZE, LEVEL_COLS * CELL_SIZE);
-
         this.background = this.background || createLevelBackground(this);
         drawImage(this.background, 0, 0);
 
@@ -130,7 +123,7 @@ class Level {
         this.renderables.forEach(x => wrap(() => x.render()));
 
         // Matrix
-        R.fillStyle = '#010640';
+        R.fillStyle = '#111';
         for (let row = 0 ; row < LEVEL_ROWS ; row++) {
             for (let col = 0 ; col < LEVEL_ROWS ; col++) {
                 if (this.definition.matrix[row][col]) {
