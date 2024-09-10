@@ -2,6 +2,12 @@ class Cycle {
     constructor() {
         this.items = [];
         this.totalDuration = 0;
+        this.phase = 0;
+    }
+
+    withPhase(phase) {
+        this.phase = phase;
+        return this;
     }
 
     add(duration, action) {
@@ -11,7 +17,13 @@ class Cycle {
     }
 
     update(element, clock) {
-        const progressInCycle = clock % this.totalDuration;
+        this.constants(element);
+
+        if (!this.items.length) {
+            return;
+        }
+
+        const progressInCycle = (this.phase + clock + this.totalDuration) % this.totalDuration;
 
         // Find which item is currently relevant
         let index = this.items.length - 1;
@@ -24,7 +36,6 @@ class Cycle {
         const progressWithinItem = progressInCycle - startTime;
         const progressRatio = progressWithinItem / duration;
 
-        this.constants(element);
         update(element, progressRatio);
     }
 }
@@ -52,9 +63,14 @@ class CameraCycle extends Cycle {
         });
     }
 
+    rotateBy(duration, angleOffset) {
+        return this.rotateTo(duration, this.lastAngle + angleOffset);
+    }
+
     constants(camera) {
         camera.x = this.x;
         camera.y = this.y;
+        camera.angle = this.lastAngle;
     }
 }
 
