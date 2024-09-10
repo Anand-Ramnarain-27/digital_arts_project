@@ -210,18 +210,21 @@ class Game {
 
         // Light in front of the sign
         R.globalAlpha = 0.5;
-        [30, 90, 150, 210].forEach((x) => {
-          drawImage(
-            GOD_RAY,
-            LEVEL_WIDTH / 2 + x - GOD_RAY.width / 2,
-            -GOD_RAY.height / 2
-          );
-          drawImage(
-            GOD_RAY,
-            LEVEL_WIDTH / 2 - x - GOD_RAY.width / 2,
-            -GOD_RAY.height / 2
-          );
-        });
+        [30, 90, 150, 210].forEach((x) =>
+          wrap(() => {
+            scale(1, -1);
+            drawImage(
+              GOD_RAY,
+              LEVEL_WIDTH / 2 + x - GOD_RAY.width / 2,
+              -GOD_RAY.height / 2
+            );
+            drawImage(
+              GOD_RAY,
+              LEVEL_WIDTH / 2 - x - GOD_RAY.width / 2,
+              -GOD_RAY.height / 2
+            );
+          })
+        );
       });
 
       // Render the windows in front
