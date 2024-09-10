@@ -28,25 +28,23 @@ HALO = createCanvas(CELL_SIZE * 4, CELL_SIZE * 4, (c, can) => {
 });
 
 COMPUTER = createCanvas(CELL_SIZE * 0.6, CELL_SIZE * 0.6, (c, can) => {
-    // Background of the terminal (dark screen)
-    c.fillStyle = '#1a1a1a'; // Dark gray for a digital screen
+    c.fillStyle = '#000';
     c.fr(0, 0, 99, 99);
 
-    // Outer border of the terminal screen
-    c.fillStyle = '#2b2b2b'; // Slightly lighter gray for the border
+    c.fillStyle = '#a9a9a9';
+    // c.fr(2, 2, can.width - 4, 20);
     c.fr(2, 2, can.width - 4, can.height - 4);
 
-    // Inner screen area
-    c.fillStyle = '#0a0a0a'; // Near-black for the main screen area
+    c.fillStyle = '#4253ff';
     c.fr(4, 4, can.width - 8, can.height - 12);
 
-    // Bottom strip (like a status bar)
-    c.fillStyle = '#3333ff'; // Bright blue for a digital look
+    c.fillStyle = '#000';
     c.fr(4, can.height - 6, can.width - 8, 2);
 
-    // Indicator light (green for active status)
-    c.fillStyle = '#00ff00'; // Bright green for an active indicator
+    c.fillStyle = '#a5dc40';
     c.fr(can.width - 6, can.height - 6, 2, 2);
+
+    // document.body.appendChild(can);
 });
 
 WINDOW_PATTERN = createCanvasPattern(CELL_SIZE * 2, CELL_SIZE * 2, (c, can) => {
@@ -67,7 +65,6 @@ BUILDINGS_BACKGROUND = createCanvasPattern(800, 400, (c, can) => {
         can.height
     );
 });
-
 
 UNPADDED_DESK = createCanvas(CELL_SIZE * 1.1, CELL_SIZE * 0.5, (c, can) => {
     // Legs
@@ -117,7 +114,7 @@ createLevelBackground = (level) => createCanvas(CELL_SIZE * LEVEL_COLS, CELL_SIZ
     // No detail on the spawn
     taken[level.definition.exit[0]][level.definition.exit[1]] = true;
 
-    const possibleDetails = [];
+    const allDetails = [];
 
     for (let row = 1 ; row < LEVEL_ROWS - 1 ; row++) {
         for (let col = 1 ; col < LEVEL_ROWS - 1 ; col++) {
@@ -126,30 +123,33 @@ createLevelBackground = (level) => createCanvas(CELL_SIZE * LEVEL_COLS, CELL_SIZ
             }
 
             const maybeAdd = (image) => {
-                return () => {
-                    // Make sure the spot is free
-                    for (let takenRow = 0 ; takenRow < image.height / CELL_SIZE ; takenRow++) {
-                        for (let takenCol = 0 ; takenCol < image.width / CELL_SIZE ; takenCol++) {
-                            if (taken[row + takenRow][col + takenCol]) {
-                                return;
-                            }
+                if (rng.floating() > 0.15) {
+                    return;
+                }
+
+                // return () => {
+                // Make sure the spot is free
+                for (let takenRow = 0 ; takenRow < image.height / CELL_SIZE ; takenRow++) {
+                    for (let takenCol = 0 ; takenCol < image.width / CELL_SIZE ; takenCol++) {
+                        if (taken[row + takenRow][col + takenCol]) {
+                            return;
                         }
                     }
+                }
 
-                    // Mark them as taken
-                    for (let takenRow = 0 ; takenRow < image.height / CELL_SIZE ; takenRow++) {
-                        for (let takenCol = 0 ; takenCol < image.width / CELL_SIZE ; takenCol++) {
-                            taken[row + takenRow][col + takenCol] = true;
-                        }
+                // Mark them as taken
+                for (let takenRow = 0 ; takenRow < image.height / CELL_SIZE ; takenRow++) {
+                    for (let takenCol = 0 ; takenCol < image.width / CELL_SIZE ; takenCol++) {
+                        taken[row + takenRow][col + takenCol] = true;
                     }
+                }
 
-                    // Render the detail
-                    c.drawImage(
-                        image,
-                        col * CELL_SIZE,
-                        row * CELL_SIZE
-                    );
-                };
+                // Render the detail
+                c.drawImage(
+                    image,
+                    col * CELL_SIZE,
+                    row * CELL_SIZE
+                );
             }
 
             const x = col * CELL_SIZE;
@@ -162,29 +162,16 @@ createLevelBackground = (level) => createCanvas(CELL_SIZE * LEVEL_COLS, CELL_SIZ
             const belowBelow = taken[row + 2] && taken[row + 2][col];
             const belowRight = taken[row + 1][col + 1];
 
-            const cellDetails = [];
-
             // Desks need one row but two columns
             if (below && !right && belowRight) {
-                cellDetails.push(maybeAdd(DESK));
-            }
-
-            if (cellDetails.length) {
-                possibleDetails.push(cellDetails);
+                maybeAdd(DESK);
             }
         }
     }
 
-    const allDetails = possibleDetails.flat();
     allDetails.forEach(detail => {
         if (rng.floating() < 0.15) {
             detail();
         }
     });
-
-    // possibleDetails.forEach((details) => {
-    //     if (rng.floating() < 0.5) {
-    //         rng.pick(details)();
-    //     }
-    // });
 });

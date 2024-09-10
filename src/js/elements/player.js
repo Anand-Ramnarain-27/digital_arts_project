@@ -145,11 +145,11 @@ class Player {
         this.readjust();
 
         // Bandana
-        // this.bandanaTrail.unshift({'x': this.x - this.facing * 5, 'y': this.y - 10 + rnd(-1, 1)});
-        // while (this.bandanaTrail.length > 30) {
-            // this.bandanaTrail.pop();
-        // }
-        // this.bandanaTrail.forEach(position => position.y += e * 100);
+        this.bandanaTrail.unshift({'x': this.x - this.facing * 5, 'y': this.y - 10 + rnd(-1, 1)});
+        while (this.bandanaTrail.length > 30) {
+            this.bandanaTrail.pop();
+        }
+        this.bandanaTrail.forEach(position => position.y += e * 100);
 
         // Trail
         if (!this.landed && !this.sticksToWall) {
@@ -304,64 +304,23 @@ class Player {
     }
 
     renderCharacter(context) {
-        context.fillStyle = 'red';
-        const squareSize = PLAYER_RADIUS * 2;  // Adjust size as needed
-        context.fillRect(-squareSize / 2, -squareSize / 2, squareSize, squareSize);
+        renderPlayer(
+            context,
+            PLAYER_BODY,
+            this.landed,
+            this.facing * this.facingScale,
+            this.walking,
+            limit(0, (this.clock - this.jumpStartTime) / this.jumpPeakTime, 1)
+        );
     }
 
     render() {
-        // Render bandana
-        // R.lineWidth = 8;
-        // R.strokeStyle = '#000';
-        // beginPath();
-        // moveTo(this.bandanaTrail[0].x, this.bandanaTrail[0].y);
+        
 
-        let remainingLength = 40;
-
-        for (let i = 1 ; i < this.bandanaTrail.length && remainingLength > 0 ; i++) {
-            const current = this.bandanaTrail[i];
-            const previous = this.bandanaTrail[i - 1];
-
-            const actualDistance = dist(current, previous);
-            const renderedDist = min(actualDistance, remainingLength);
-            remainingLength -= renderedDist;
-            const ratio = renderedDist / actualDistance;
-
-            // beginPath();
-            lineTo(
-                previous.x + ratio * (current.x - previous.x),
-                previous.y + ratio * (current.y - previous.y)
-            );
-        }
-        stroke();
-
+        // Then render the actual character
         wrap(() => {
             translate(this.x, this.y);
             this.renderCharacter(R);
         });
-
-        const angles = [];
-
-        R.strokeStyle = '#f00';
-        R.fillStyle = '#f00';
-        R.globalAlpha = 0.2;
-        R.lineWidth = 5;
-
-        beginPath();
-        for (let angle = 0 ; angle < PI * 2 ; angle += PI / 16) {
-            const impact = castRay(this.x, this.y, angle, 400);
-            // beginPath();
-            // moveTo(this.x, this.y);
-            lineTo(impact.x, impact.y);
-            // stroke();
-        }
-
-        // fill();
-
-        // const allAdjustments = this.allSnapAdjustments();
-        // allAdjustments.forEach((adjustment) => {
-        //     R.strokeStyle = 'blue';
-        //     strokeRect(adjustment.x - PLAYER_RADIUS, adjustment.y - PLAYER_RADIUS, PLAYER_RADIUS * 2, PLAYER_RADIUS * 2);
-        // });
     }
 }
