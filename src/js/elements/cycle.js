@@ -106,5 +106,11 @@ class GuardCycle extends Cycle {
 
     constants(guard) {
         guard.y = this.y;
+        guard.x = this.lastX;
+    }
+
+    patrol(pauseFrom, toCol, pauseTo) {
+        const fromCol = toCellUnit(this.lastX);
+        return this.wait(pauseFrom).walkTo(toCol).wait(pauseTo).walkTo(fromCol);
     }
 }
