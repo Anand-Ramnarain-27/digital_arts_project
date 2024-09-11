@@ -9,7 +9,6 @@ class Level {
     endWith(f) {
         if (!this.ended) {
             this.ended = true;
-            this.player.controllable = false;
             f();
         }
     }
@@ -19,7 +18,7 @@ class Level {
             const hasNextLevel = LEVELS[this.index + 1];
             G.menu = new Menu(
                 nomangle('Infiltrating Core Systems...'),
-hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
+                hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
             );
             G.menu.animateIn();
 
@@ -49,8 +48,9 @@ hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
         setTimeout(() => this.waitingForRetry = true, 1000);
     }
 
-    start() {
+    prepare() {
         this.ended = false;
+        this.started = false;
 
         this.clock = 0;
 
@@ -62,14 +62,15 @@ hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
             toMiddleCellCoord(this.definition.spawn[1]),
             toMiddleCellCoord(this.definition.spawn[0])
         );
+        this.cyclables.push(this.player);
 
-        this.exit = new Exit(
+        const exit = new Exit(
             this,
             toMiddleCellCoord(this.definition.exit[1]),
             toMiddleCellCoord(this.definition.exit[0])
         );
-        this.cyclables.push(this.exit);
-        this.renderables.push(this.exit);
+        this.cyclables.push(exit);
+        this.renderables.push(exit);
 
         this.definition.cameras.forEach(cameraDefinition => {
             const camera = new Camera(this, cameraDefinition);
@@ -83,12 +84,17 @@ hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
             this.renderables.push(guard);
         });
 
-        setTimeout(() => {
-            this.player.controllable = true;
-            this.player.spawn();
-            this.cyclables.push(this.player);
-            this.renderables.push(this.player);
-        }, 1000);
+        // Give cyclables a cycle so they're in place
+        this.cyclables.forEach((cyclable) => {
+            cyclable.cycle(0);
+        });
+    }
+
+    start() {
+        this.started = true;
+
+        this.player.spawn();
+        this.renderables.push(this.player);
     }
 
     stop() {
@@ -97,15 +103,17 @@ hasNextLevel ? nomangle('Breach Successful') : nomangle('TOOK DOWN THE SYSTEM!')
     }
 
     cycle(e) {
-        this.clock += e;
-
-        this.cyclables.forEach(x => x.cycle(e));
+        if (this.started && !this.ended) {
+            this.clock += e;
+            this.cyclables.forEach(x => x.cycle(e));
+        }
 
         if (down[KEYBOARD_SPACE] && this.waitingForRetry) {
             this.waitingForRetry = false;
             G.menu.animateOut();
 
-            setTimeout(() => this.start(), 1000);
+            this.prepare();
+            this.start(); // TODO maybe a quick delay
         }
     }
 

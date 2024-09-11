@@ -16,8 +16,6 @@ class Player {
         this.jumpEndY = 0;
         this.jumpPeakTime = 0;
 
-        this.controllable = false;
-
         this.clock = 0;
 
         this.bandanaTrail = [];
@@ -70,7 +68,7 @@ class Player {
 
         this.clock += e;
 
-        const holdingJump = down[KEYBOARD_SPACE] && this.controllable;
+        const holdingJump = down[KEYBOARD_SPACE];
         this.jumpReleased = this.jumpReleased || !holdingJump;
 
         if (holdingJump) {
@@ -85,8 +83,9 @@ class Player {
             this.jumpStartY = this.y;
             this.jumpStartTime = this.clock;
 
-            this.vX += this.sticksToWall * 800;
-
+            if (this.sticksToWall) {
+                this.vX = this.sticksToWall * 800;
+            }
             // Fixes a walljump issue: vY would keep accumulating even though a new jump was
             // started, causing bad physics once the jump reaches its peak.
             this.vY = 0;
@@ -113,15 +112,13 @@ class Player {
 
         // Left/right
         let dX = 0, targetVX = 0;
-        if (this.controllable) {
-            if (down[KEYBOARD_LEFT]) {
-                dX = -1;
-                targetVX = -PLAYER_HORIZONTAL_SPEED;
-            }
-            if (down[KEYBOARD_RIGHT]) {
-                dX = 1;
-                targetVX = PLAYER_HORIZONTAL_SPEED;
-            }
+        if (down[KEYBOARD_LEFT]) {
+            dX = -1;
+            targetVX = -PLAYER_HORIZONTAL_SPEED;
+        }
+        if (down[KEYBOARD_RIGHT]) {
+            dX = 1;
+            targetVX = PLAYER_HORIZONTAL_SPEED;
         }
 
         if (this.landed && dX) {
@@ -143,25 +140,23 @@ class Player {
         this.readjust();
 
         // Bandana
-        this.bandanaTrail.unshift({'x': this.x - this.facing * 5, 'y': this.y - 10 + rnd(-1, 1)});
-        while (this.bandanaTrail.length > 30) {
-            this.bandanaTrail.pop();
-        }
-        this.bandanaTrail.forEach(position => position.y += e * 100);
+        // this.bandanaTrail.unshift({'x': this.x - this.facing * 5, 'y': this.y - 10 + rnd(-1, 1)});
+        // while (this.bandanaTrail.length > 30) {
+        //     this.bandanaTrail.pop();
+        // }
+        // this.bandanaTrail.forEach(position => position.y += e * 100);
 
         // Trail
-        if (!this.landed && !this.sticksToWall) {
-            const {x,y} = this;
-            const trail = createCanvas(CELL_SIZE * 2, CELL_SIZE * 2, (r) => {
-                r.translate(CELL_SIZE, CELL_SIZE);
-                this.renderCharacter(r);
-            })
+        if (!this.landed && !this.sticksToWall && this.level.clock) {
+            const { renderCharacterParams, x, y } = this;
+
             const renderable = {
                 'render': () => {
                     R.globalAlpha = renderable.alpha;
-                    drawImage(trail, x - trail.width / 2, y - trail.height / 2);
+                    translate(x, y);
+                    renderCharacter.apply(null, renderCharacterParams);
                 }
-            }
+            };
 
             this.level.renderables.push(renderable);
             interp(renderable, 'alpha', 0.1, 0, 0.5, 0.2, null, () => {
@@ -301,24 +296,51 @@ class Player {
 
     }
 
-    renderCharacter(context) {
-        renderPlayer(
-            context,
+    get renderCharacterParams() {
+        return [
+            R,
+            this.level.clock,
             PLAYER_BODY,
             this.landed,
             this.facing * this.facingScale,
             this.walking,
             limit(0, (this.clock - this.jumpStartTime) / this.jumpPeakTime, 1)
-        );
+        ];
     }
 
     render() {
-        
+        // Render bandana
+        // R.lineWidth = 8;
+        // R.strokeStyle = '#000';
+        // R.lineJoin = 'round';
+        // beginPath();
+        // moveTo(this.bandanaTrail[0].x, this.bandanaTrail[0].y);
+
+        // let remainingLength = MAX_BANDANA_LENGTH;
+
+        // for (let i = 1 ; i < this.bandanaTrail.length && remainingLength > 0 ; i++) {
+        //     const current = this.bandanaTrail[i];
+        //     const previous = this.bandanaTrail[i - 1];
+
+        //     const actualDistance = dist(current, previous);
+        //     const renderedDist = min(actualDistance, remainingLength);
+        //     remainingLength -= renderedDist;
+        //     const ratio = renderedDist / actualDistance;
+
+        //     // beginPath();
+        //     lineTo(
+        //         previous.x + ratio * (current.x - previous.x),
+        //         previous.y + ratio * (current.y - previous.y)
+        //     );
+        // }
+        // stroke();
 
         // Then render the actual character
         wrap(() => {
             translate(this.x, this.y);
-            this.renderCharacter(R);
+
+            renderCharacter.apply(null, this.renderCharacterParams);
+            // this.renderCharacter(R);
         });
     }
 }
