@@ -13,12 +13,10 @@ BUILDINGS_BACKGROUND = [
     }
 }));
 
-SKY_BACKGROUND = createCanvasPattern(1, CANVAS_HEIGHT, (c) => {
-    const g = c.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-    g.addColorStop(0, '#000');
-    g.addColorStop(0.7, '#000');
-    g.addColorStop(1, '#000');
-
-    c.fillStyle = g;
-    c.fr(0, 0, 200, CANVAS_HEIGHT);
+SKY_BACKGROUND = createCanvas(1, CANVAS_HEIGHT, (c) => {
+    const gradient = c.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+    gradient.addColorStop(0, '#000');
+    gradient.addColorStop(0.7, '#000');
+    gradient.addColorStop(1, '#000');
+    return gradient;
 });
