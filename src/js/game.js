@@ -23,7 +23,7 @@ class Game {
         this.titleAlpha = 1;
 
         this.title = nomangle('HACKER');
-        this.interTitle = nomangle('VSs');
+        this.interTitle = nomangle('VS');
     }
 
     startAnimation() {
