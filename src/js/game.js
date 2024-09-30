@@ -1,81 +1,147 @@
+const HACKER_POSITION = {
+    'x': LEVEL_WIDTH / 2 + 30,
+    'y': -PLAYER_RADIUS
+};
+const TITLE_FONT = italicFont(120);
+const INTER_TITLE_FONT = italicFont(24);
+
 class Game {
 
     constructor() {
         G = this;
         G.clock = 0;
 
-        this.timer = 0;
-        this.timerActive = false;
+        G.timer = 0;
+        G.timerActive = false;
 
-        this.level = LEVELS[0];
-        if (DEBUG) {
-            this.level = LEVELS[getDebugValue('level', 0)];
-        }
-        this.level.prepare();
+        G.difficulty = NORMAL_DIFFICULTY;
+        G.wasDifficultyChangedDuringRun = false;
+        G.difficultyPromptShown = false;
 
-        this.bottomScreenAltitude = MAX_LEVEL_ALTITUDE + LEVEL_HEIGHT - CANVAS_HEIGHT / 2 + 100;
-        this.windowsAlpha = 1;
-        this.titleAlpha = 1;
+        G.level = LEVELS[0];
+        G.level.prepare();
 
-        this.title = nomangle('HACKER');
-        this.interTitle = nomangle('VS');
+        G.renderables = [];
+
+        G.bottomScreenAltitude = MAX_LEVEL_ALTITUDE + LEVEL_HEIGHT - CANVAS_HEIGHT / 2 + 100;
+        G.windowsAlpha = 1;
+
+        G.introAlpha = 1;
+        G.mainTitleAlpha = 1;
+        G.mainTitleYOffset = 1;
+        G.interTitleYOffset = 1;
+
+        G.bandanaSource = {'x': HACKER_POSITION.x, 'y': HACKER_POSITION.y - 10};
+        G.bandanaTrail = Array(~~(MAX_BANDANA_LENGTH / MAIN_MENU_BANDANA_X_INTERVAL)).fill(0).map((x, i) => {
+            return { 'x': G.bandanaSource.x + PLAYER_RADIUS / 2 + i * MAIN_MENU_BANDANA_X_INTERVAL};
+        })
+
+        G.mainTitle = nomangle('HACKER');
+        G.interTitle = nomangle('VS');
+
+        interp(G, 'introAlpha', 1, 0, 1, 2);
+        interp(G, 'mainTitleYOffset', -CANVAS_HEIGHT , 0, 0.3, 0.5, null, () => {
+            G.shakeTitleTime = 0.1;
+
+            R.font = TITLE_FONT;
+            G.dust(measureText(G.mainTitle).width / 2, TITLE_Y + 50, 100);
+        });
+        interp(G, 'interTitleYOffset', CANVAS_HEIGHT, 0, 0.3, 1, null, () => {
+            G.shakeTitleTime = 0.1;
+
+            R.font = INTER_TITLE_FONT;
+            G.dust(measureText(G.interTitle).width / 2, INTER_TITLE_Y - 20, 5);
+        });
     }
 
+    dust(spreadRadius, y, count) {
+        for (let i = 0 ; i < count ; i++) {
+            G.particle({
+                'size': [16],
+                'color': '#fff',
+                'duration': rnd(0.4, 0.8),
+                'x': [CANVAS_WIDTH / 2 + rnd(-spreadRadius, spreadRadius), rnd(-40, 40)],
+                'y': [y + rnd(-10, 10), rnd(-15, 15)]
+            });
+        }
+    }
+
+    changeDifficulty() {
+        if (G.isStarted) {
+            G.wasDifficultyChangedDuringRun = true;
+        }
+
+        const settings = difficultySettings();
+        const currentDifficultyIndex = settings.indexOf(G.difficulty);
+        G.difficulty = settings[(currentDifficultyIndex + 1) % settings.length];
+    };
+
     startAnimation() {
-        if (this.isStarted) {
+        if (G.isStarted) {
             return;
         }
 
-        this.isStarted = true;
+        G.isStarted = true;
 
-        this.timerActive = true;
-        this.timer = 0;
+        G.timer = 0;
 
-        this.level = LEVELS[0];
-        if (DEBUG) {
-            this.level = LEVELS[getDebugValue('level', 0)];
-        }
-        this.level.prepare();
+        G.wasDifficultyChangedDuringRun = false;
+        G.queuedTweet = null;
 
-        interp(
-            this,
-            'titleAlpha',
-            1,
-            0,
-            0.5
-        );
+        G.level = LEVELS[0];
+        G.level.prepare();
+
+        // Fade the title and intertitle out
+        interp(G, 'mainTitleAlpha', 1, 0, 0.5);
 
         // Center the level, hide the windows, then start it
-        this.centerLevel(
-            this.level.index,
+        G.centerLevel(
+            G.level.index,
             5,
+            0.5,
             () => {
                 // Hide the windows, then start the level
-                interp(this, 'windowsAlpha', 1, 0, 1, 0, null, () => this.level.start());
+                interp(G, 'windowsAlpha', 1, 0, 1, 0, null, () => {
+                    G.timerActive = true;
+                    G.level.start()
+                });
             }
         )
+
+        setTimeout(() => {
+            G.menu = new Menu(
+                nomangle('INFILTRATE THE SYSTEM'),
+                nomangle('DESTORY IT ALL')
+            );
+            G.menu.dim = false;
+            G.menu.animateIn();
+
+            setTimeout(() => G.menu.animateOut(), 3000);
+        }, 1000);
+
+        beepSound();
     }
 
     get bestTime() {
         try {
-            return parseFloat(localStorage[location.pathName]) || 0;
+            return parseFloat(localStorage[G.bestTimeKey]) || 0;
         } catch(e) {
             return 0;
         }
     }
 
-    endAnimation() {
-        // Allow the player to start the game again
-        this.isStarted = false;
-        this.timerActive = false;
+    get bestTimeKey() {
+        return location.pathname + G.difficulty.label;
+    }
 
-        localStorage[location.pathName] = min(this.bestTime || 999999, this.timer);
+    mainMenu() {
+        INTERPOLATIONS = [];
 
         // Go to the top of the tower
         interp(
-            this,
+            G,
             'bottomScreenAltitude',
-            this.bottomScreenAltitude,
+            G.bottomScreenAltitude,
             MAX_LEVEL_ALTITUDE + LEVEL_HEIGHT - CANVAS_HEIGHT / 2 + 100,
             2,
             0.5,
@@ -83,52 +149,72 @@ class Game {
         );
 
         // Show the windows so the tower can be rendered again
-        interp(this, 'windowsAlpha', 0, 1, 1, 1);
+        interp(G, 'windowsAlpha', G.windowsAlpha, 1, 1, 1);
+        interp(G, 'mainTitleAlpha', 0, 1, 1, 3);
 
-        // Replace the title and fade it in
-        this.title = 'YOU BEAT';
-        this.interTitle = '';
-        interp(this, 'titleAlpha', 0, 1, 1, 3);
+        G.isStarted = false;
+        G.timerActive = false;
+        G.timer = 0;
+    }
+
+    endAnimation() {
+        // Allow the player to start the game again
+        G.isStarted = false;
+        G.timerActive = false;
+
+        // Only save the best time if the player didn't switch the difficulty during
+        if (!G.wasDifficultyChangedDuringRun) {
+            localStorage[G.bestTimeKey] = min(G.bestTime || 999999, G.timer);
+        }
+
+        G.mainMenu();
+
+        // Replace the title
+        G.mainTitle = nomangle('YOU BEAT');
+        G.interTitle = '';
+
+        // Trophies for OS13K (not checking if the player changed difficulty just so they can win trophies more easily)
+        const hardTrophy = G.difficulty == HARD_DIFFICULTY;
+        const normalTrophy = G.difficulty == NORMAL_DIFFICULTY || hardTrophy;
+
+        const keyPrefix = nomangle(`OS13kTrophy,GG,${document.title},Beat the game - `);
+        const value = nomangle(`'DESTORY IT ALL'`);
+
+        if (normalTrophy) {
+            localStorage[keyPrefix + nomangle('normal')] = value;
+        }
+
+        if (hardTrophy) {
+            localStorage[keyPrefix + nomangle('nightmare')] = value;
+        }
+
+        localStorage[keyPrefix + nomangle('any')] = value;
     }
 
     cycle(e) {
-        if (DEBUG) {
-            if (w.down[KEYBOARD_F]) {
-                e *= 4;
-            }
-            if (w.down[KEYBOARD_G]) {
-                e *= 0.25;
-            }
+        if (G.timerActive) {
+            G.timer += e;
+        }
+        G.clock += e;
+        G.shakeTitleTime -= e;
+
+        if (INPUT.jump()) {
+            G.startAnimation();
         }
 
-        this.clock += e;
-        if (this.timerActive) {
-            this.timer += e;
-        }
-
-        if (down[KEYBOARD_SPACE]) {
-            this.startAnimation();
-        }
-
-        this.level.cycle(e);
+        G.level.cycle(e);
         INTERPOLATIONS.slice().forEach(i => i.cycle(e));
-
-        if (this.menu) {
-            this.menu.cycle(e);
-        }
-
-        wrap(() => this.render());
     }
 
-    centerLevel(levelIndex, duration, callback) {
+    centerLevel(levelIndex, duration, delay, callback) {
         // Move the camera to the new level, and only then start it
         interp(
-            this,
+            G,
             'bottomScreenAltitude',
-            this.bottomScreenAltitude,
-            this.levelBottomAltitude(levelIndex) - TOWER_BASE_HEIGHT,
+            G.bottomScreenAltitude,
+            G.levelBottomAltitude(levelIndex) - TOWER_BASE_HEIGHT,
             duration,
-            0,
+            delay,
             easeInOutCubic,
             callback
         );
@@ -136,14 +222,16 @@ class Game {
 
     nextLevel() {
         // Stop the previous level
-        this.level.stop();
+        G.level.stop();
 
         // Prepare the new one
-        this.level = LEVELS[this.level.index + 1];
-        this.level.prepare();
+        G.level = LEVELS[G.level.index + 1];
+        G.level.prepare();
 
         // Move the camera to the new level, and only then start it
-        this.centerLevel(this.level.index, 0.5, () => this.level.start());
+        G.centerLevel(G.level.index, 0.5, 0, () => G.level.start());
+
+        nextLevelSound();
     }
 
     levelBottomAltitude(levelIndex) {
@@ -151,101 +239,98 @@ class Game {
     }
 
     render() {
-        let lastTime = performance.now();
-        const perfLogs = [];
-        const logPerf = label => {
-            if (!getDebugValue('perf')) {
-                return;
-            }
-
-            const now = performance.now();
-            perfLogs.push([label, now - lastTime]);
-            lastTime = now;
-        };
-
         // Sky
-        R.fillStyle = SKY_BACKGROUND;
+        fs(SKY_BACKGROUND);
         fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // TODO maybe split into two?
-
-        if (DEBUG) logPerf('sky');
 
         // Moon
         // wrap(() => {
-        //     translate(CANVAS_WIDTH - 200, 100);
-
-        //     R.globalAlpha = 0.2;
-        //     drawImage(HALO, -HALO.width / 2, -HALO.height / 2);
-
-        //     // Moon shape
-        //     R.globalAlpha = 1;
-        //     R.fillStyle = '#fff';
-        //     beginPath();
-        //     arc(0, 0, 50, 0, PI * 2, true);
-        //     fill();
+        //     fs('#fff');
+        //     fillCircle(CANVAS_WIDTH - 200, 100, 50);
         // })
 
-        // if (DEBUG) logPerf('moon');
-
         // Thunder
-        // if (G.clock % 3 < 0.3 && G.clock % 0.1 < 0.05) {
-        //     R.fillStyle = 'rgba(255, 255, 255, 0.2)';
-        //     fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        // }
+        // if (G.clock % THUNDER_INTERVAL < 0.3) {
+        //     if (G.clock % 0.1 < 0.05) {
+        //         fs('rgba(255, 255, 255, 0.2)');
+        //         fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        //     }
 
-        // if (DEBUG) logPerf('thunder');
+        //     R.strokeStyle = '#fff';
+        //     R.lineWidth = 4;
+        //     let x = createNumberGenerator(G.clock / THUNDER_INTERVAL).floating() * CANVAS_WIDTH;
+        //     beginPath();
+        //     for (let y = 0 ; y <= CANVAS_HEIGHT ; y += 40) {
+        //         x += rnd(-40, 40);
+        //         lineTo(x, y);
+        //     }
+        //     stroke();
+        // }
 
         // Buildings in the background
         BUILDINGS_BACKGROUND.forEach((layer, i) => wrap (() => {
             const layerRatio = 0.2 + 0.8 * i / (BUILDINGS_BACKGROUND.length - 1);
 
-            const altitudeRatio = this.bottomScreenAltitude / MAX_LEVEL_ALTITUDE;
+            const altitudeRatio = G.bottomScreenAltitude / MAX_LEVEL_ALTITUDE;
 
-            R.fillStyle = layer;
+            fs(layer);
             translate(0, ~~(CANVAS_HEIGHT - layer.height + altitudeRatio * layerRatio * 400));
 
             fr(0, 0, CANVAS_WIDTH, layer.height);
         }));
 
-        if (DEBUG) logPerf('builds bg');
-
         // Rain
-        // R.fillStyle = 'rgba(255,255,255,0.4)';
-        // const rng = createNumberGenerator(1);
-        // for (let i = 0 ; i < 200 ; i++) {
-        //     const x = rng.floating() * CANVAS_WIDTH;
-        //     const startY = rng.floating() * CANVAS_HEIGHT;
-        //     const speed = rng.between(800, 1600);
-        //     const y = (startY + G.clock * speed + this.bottomScreenAltitude) % evaluate(CANVAS_HEIGHT + RAIN_DROP_LENGTH);
+        // wrap(() => {
+        //     fs('rgba(255,255,255,0.4)');
+        //     const rng = createNumberGenerator(1);
+        //     for (let i = 0 ; i < 200 ; i++) {
+        //         const startX = rng.between(-0.2, 1);
+        //         const startRatio = rng.floating();
+        //         const speed = rng.between(1, 2);
 
-        //     fr(x, y, 1, -RAIN_DROP_LENGTH);
-        // }
+        //         const rainDropAngle = PI * 14 / 32 + rng.between(-1, 1) * PI / 64;
 
-        // if (DEBUG) logPerf('rain');
+        //         const ratio = (startRatio + G.clock * speed) % 1.2;
+        //         const xRatio = startX + cos(rainDropAngle) * ratio;
+        //         const yRatio = sin(rainDropAngle) * ratio;
 
-        // Render the levels
+        //         wrap(() => {
+        //             translate(xRatio * CANVAS_WIDTH, yRatio * CANVAS_HEIGHT);
+        //             rotate(rainDropAngle);
+        //             fr(0, 0, -RAIN_DROP_LENGTH, 1);
+        //         });
+        //     }
+        // });
+
+        // Render the tower
         wrap(() => {
-            translate(LEVEL_X, ~~this.bottomScreenAltitude + LEVEL_HEIGHT + TOWER_BASE_HEIGHT);
+            translate(LEVEL_X, ~~G.bottomScreenAltitude + LEVEL_HEIGHT + TOWER_BASE_HEIGHT);
 
-            const currentLevelIndex = LEVELS.indexOf(this.level);
-            for (let i = max(0, currentLevelIndex - 1) ; i < min(LEVELS.length, currentLevelIndex + 2) ; i++) {
-                wrap(() => {
-                    translate(0, -this.levelBottomAltitude(i) - LEVEL_HEIGHT);
-                    LEVELS[i].render();
-                });
-            }
-
-            if (DEBUG) logPerf('levels');
-
-            // Render the top of the tower
+            // Render the rooftop (sign, lights)
             wrap(() => {
                 translate(0, -MAX_LEVEL_ALTITUDE - LEVEL_HEIGHT);
 
-                // Sign holder
                 wrap(() => {
-                    translate(LEVEL_WIDTH / 2 - CELL_SIZE * 6, 0);
-                    fs(SIGN_HOLDER_PATTERN);
-                    fr(0, 0, CELL_SIZE * 12, -CELL_SIZE * 2);
+                    R.globalAlpha = 0.5;
+
+                    drawImage(
+                        GOD_RAY,
+                        0, 0,
+                        GOD_RAY.width,
+                        GOD_RAY.height / 2,
+                        0,
+                        -100,
+                        LEVEL_WIDTH,
+                        100
+                    );
                 });
+
+                // Sign holder
+                // wrap(() => {
+                //     translate(LEVEL_WIDTH / 2 - CELL_SIZE * 6, 0);
+                //     fs(SIGN_HOLDER_PATTERN);
+                //     fr(0, 0, CELL_SIZE * 12, -CELL_SIZE * 2);
+                // });
 
                 // Halo behind the sign
                 [
@@ -262,90 +347,194 @@ class Game {
                 // Sign
                 R.textAlign = nomangle('center');
                 R.textBaseline = nomangle('alphabetic');
-                R.fillStyle = '#900';
+                fs('#900');
                 R.strokeStyle = '#f00';
                 R.lineWidth = 5;
-                R.font = nomangle('italic 96pt Impact');
-                fillText(nomangle('CYBERSPACE'), LEVEL_WIDTH / 2, -30);
-                strokeText(nomangle('CYBERSPACE'), LEVEL_WIDTH / 2, -30);
+                R.font = italicFont(96);
+                outlinedText(nomangle('CYBERSPACE'), LEVEL_WIDTH / 2, -30);
 
-                // Lights on the edges of the tower
-                drawImage(GOD_RAY, 10, -GOD_RAY.height / 2);
-                drawImage(GOD_RAY, LEVEL_WIDTH - 10 - GOD_RAY.width, -GOD_RAY.height / 2);
+                // wrap(() => {
+                //     const ninjaScale = 1.5;
+
+                //     G.bandanaTrail.forEach((item, i, arr) => {
+                //         const ratio = i / arr.length
+                //         const amplitude = 15 * ratio;
+                //         item.y = G.bandanaSource.y - ratio * 30 + sin(-ratio * 20 + G.clock * 35) * amplitude;
+                //     });
+
+                //     scale(1.5, 1.5);
+                //     renderBandana(R, G.bandanaSource, G.bandanaTrail);
+
+                //     translate(HACKER_POSITION.x, HACKER_POSITION.y);
+                //     renderCharacter(
+                //         R,
+                //         G.clock,
+                //         PLAYER_BODY,
+                //         true,
+                //         -1,
+                //         0,
+                //         0
+                //     );
+                // });
             });
 
-            if (DEBUG) logPerf('roof');
+            // Render the levels
+            const currentLevelIndex = LEVELS.indexOf(G.level);
+            for (let i = max(0, currentLevelIndex - 1) ; i < min(LEVELS.length, currentLevelIndex + 2) ; i++) {
+                wrap(() => {
+                    translate(0, -G.levelBottomAltitude(i) - LEVEL_HEIGHT);
+                    LEVELS[i].render();
+                });
+            }
 
             // Render the windows in front
-            R.globalAlpha = this.windowsAlpha;
-            R.fillStyle = BUILDING_PATTERN;
-            wrap(() => {
-                // translate(-CELL_SIZE / 2, 0);
-                fr(0, 0, LEVEL_WIDTH, -MAX_LEVEL_ALTITUDE - LEVEL_HEIGHT);
-            });
+            // R.globalAlpha = G.windowsAlpha;
+            // fs(BUILDING_PATTERN);
+            // wrap(() => {
+            //     // translate(-CELL_SIZE / 2, 0);
+            //     fr(0, 0, LEVEL_WIDTH, -MAX_LEVEL_ALTITUDE - LEVEL_HEIGHT);
+            // });
 
-            if (DEBUG) logPerf('windows');
         });
 
-        if (this.menu) {
-            wrap(() => this.menu.render());
+        if (G.menu) {
+            wrap(() => G.menu.render());
         }
 
         wrap(() => {
-            R.globalAlpha = this.titleAlpha;
 
-            R.textAlign = nomangle('center');
-            R.textBaseline = nomangle('alphabetic');
-            R.fillStyle = '#fff';
-            R.strokeStyle = '#000';
-            R.lineWidth = 5;
+            // Instructions
+            if (G.clock % 2 < 1.5 && G.mainTitleAlpha == 1) {
+                const instructions = [
+                    nomangle('PRESS [SPACE] TO START'),
+                    DIFFICULTY_INSTRUCTION.toUpperCase(),
+                ]
+                instructions.forEach((s, i) => {
+                    R.textAlign = nomangle('center');
+                    R.textBaseline = nomangle('middle');
+                    R.font = font(24);
+                    fs('#fff');
+                    R.strokeStyle = '#000';
+                    R.lineWidth = 2;
 
-            R.font = nomangle('italic 120pt Impact');
-            fillText(this.title, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 45);
-            strokeText(this.title, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 45);
-
-            R.font = nomangle('24pt Impact');
-            R.lineWidth = 2;
-            fillText(this.interTitle, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 85);
-            strokeText(this.interTitle, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 3 + 85);
-
-            if (G.clock % 2 < 1.5 && this.titleAlpha == 1) {
-                fillText(nomangle('PRESS [SPACE] TO START'), CANVAS_WIDTH / 2, CANVAS_HEIGHT * 4 / 5);
-                strokeText(nomangle('PRESS [SPACE] TO START'), CANVAS_WIDTH / 2, CANVAS_HEIGHT * 4 / 5);
+                    outlinedText(s, CANVAS_WIDTH / 2, CANVAS_HEIGHT * 4 / 5 + i * 50);
+                });
             }
         });
 
-        if (DEBUG) logPerf('instructions');
+        // Mobile controls
+        fs('#000');
+        fr(0, CANVAS_HEIGHT, CANVAS_WIDTH, MOBILE_CONTROLS_HEIGHT);
+
+        fs('#fff');
+
+        wrap(() => {
+            R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_LEFT];
+            translate(CANVAS_WIDTH / 8, CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2);
+            scale(-1, 1);
+            renderMobileArrow();
+        });
+
+        wrap(() => {
+            R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_RIGHT];
+            translate(CANVAS_WIDTH * 3 / 8, CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2);
+            renderMobileArrow();
+        });
+
+        wrap(() => {
+            R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_SPACE];
+            fillCircle(
+                evaluate(CANVAS_WIDTH * 3 / 4),
+                evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
+                evaluate(MOBILE_BUTTON_SIZE / 2)
+            );
+        });
 
         // HUD
-        const hudItems = [];
-        if (this.timer) {
-            hudItems.push([nomangle('LEVEL:'), this.level.index + 1]);
-            hudItems.push([nomangle('TIME:'), formatTime(this.timer)]);
-            hudItems.push([nomangle('BEST:'), formatTime(this.bestTime)]);
+        const hudItems = [
+            [nomangle('DIFFICULTY:'), G.difficulty.label]
+        ];
+
+        if (G.timer) {
+            hudItems.push([
+                nomangle('LEVEL:'),
+                (G.level.index + 1) + '/' + LEVELS.length
+            ]);
+            hudItems.push([
+                nomangle('TIME' ) + (G.wasDifficultyChangedDuringRun ? nomangle(' (INVALIDATED):') : ':'),
+                formatTime(G.timer)
+            ]);
         }
 
-        if (DEBUG) {
-            hudItems.push(['FPS', ~~G.fps]);
-            perfLogs.forEach(log => {
-                hudItems.push(log);
-            });
-        }
+        hudItems.push([
+            nomangle('BEST [') + G.difficulty.label + ']:',
+            formatTime(G.bestTime)
+        ]);
+
 
         hudItems.forEach(([label, value], i) => wrap(() => {
+
             R.textAlign = nomangle('left');
             R.textBaseline = nomangle('middle');
-            R.fillStyle = '#fff';
-            R.fillStyle = '#fff';
+            fs('#fff');
 
             // Label
-            R.font = nomangle('bold italic 18pt Impact');
-            fillText(label, 20, 30 + i * 90);
+            R.font = italicFont(18);
+            shadowedText(label, 20, 30 + i * 90);
 
             // Value
-            R.font = nomangle('36pt Impact');
-            fillText(value, 20, 30 + 40 + i * 90);
+            R.font = font(36);
+            shadowedText(value, 20, 30 + 40 + i * 90);
         }));
+
+        // Gamepad info
+        R.textAlign = nomangle('right');
+        R.textBaseline = nomangle('alphabetic');
+        R.font = nomangle('18pt Courier');
+        fs('#888');
+        fillText(
+            nomangle('Gamepad: ') + (gamepads().length ? nomangle('yes') : nomangle('no')),
+            evaluate(CANVAS_WIDTH - 20),
+            evaluate(CANVAS_HEIGHT - 20)
+        );
+
+        // Intro background
+        wrap(() => {
+            R.globalAlpha = G.introAlpha;
+            fs('#000');
+            fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        });
+
+        // Title
+        wrap(() => {
+            if (G.shakeTitleTime > 0) {
+                translate(rnd(-10, 10), rnd(-10, 10));
+            }
+
+            R.globalAlpha = G.mainTitleAlpha;
+            R.textAlign = nomangle('center');
+            R.textBaseline = nomangle('middle');
+            fs('#fff');
+            R.strokeStyle = '#000';
+
+            // Main title
+            R.lineWidth = 5;
+            R.font = TITLE_FONT;
+            outlinedText(G.mainTitle, CANVAS_WIDTH / 2, TITLE_Y + G.mainTitleYOffset);
+
+            // "Inter" title (between the title and EVILCORP)
+            R.font = INTER_TITLE_FONT;
+            R.lineWidth = 2;
+            outlinedText(G.interTitle, CANVAS_WIDTH / 2, INTER_TITLE_Y + G.interTitleYOffset);
+        });
+
+        G.renderables.forEach(renderable => wrap(() => renderable.render()));
+    }
+
+    particle(props) {
+        let particle;
+        props.onFinish = () => remove(G.renderables, particle);
+        G.renderables.push(particle = new Particle(props));
     }
 
 }

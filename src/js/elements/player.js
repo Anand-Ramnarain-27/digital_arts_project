@@ -15,6 +15,10 @@ class Player {
         this.jumpStartY = 0;
         this.jumpEndY = 0;
         this.jumpPeakTime = 0;
+        this.lastLanded = {'x':0, 'y': 0};
+        this.lastWallStick = {'x':0, 'y': 0, 'direction': 0};
+
+        this.stickingToWallX = 0;
 
         this.clock = 0;
 
@@ -23,29 +27,33 @@ class Player {
 
     get landed() {
         const leftX = this.x - PLAYER_RADIUS;
-        const rightX = this.x + PLAYER_RADIUS;
+        const rightX = this.x + PLAYER_RADIUS - 1; // -1 so we can't jump off a wall
         const bottomY = this.y + PLAYER_RADIUS + 1;
 
         return hasBlock(leftX, bottomY) || hasBlock(rightX, bottomY);
     }
 
-    get sticksToWall() {
-        if (this.landed) {
-            return 0;
+    get canJump() {
+        // Don't jump until the player has release the jump key
+        if (!this.jumpReleased) {
+            return false;
         }
 
-        const leftX = this.x - PLAYER_RADIUS - 1;
-        const rightX = this.x + PLAYER_RADIUS + 1;
-
-        if (hasBlock(leftX, this.y)) {
-            return 1;
+        // Avoid double jumping unless we're sticking to a wall
+        if (this.isRising && !this.sticksToWall) {
+            return false;
         }
 
-        if (hasBlock(rightX, this.y)) {
-            return -1;
+        // If the user hasn't landed recently, don't let us jump
+        if (dist(this, this.lastLanded) > COYOTE_RADIUS && abs(this.x - this.lastWallStick.x) > COYOTE_RADIUS_WALLJUMP) {
+            return false;
         }
 
-        return 0;
+        return true;
+    }
+
+    get isRising() {
+        return this.clock < this.jumpStartTime + this.jumpPeakTime;
     }
 
     cycle(e) {
@@ -68,7 +76,7 @@ class Player {
 
         this.clock += e;
 
-        const holdingJump = down[KEYBOARD_SPACE];
+        const holdingJump = INPUT.jump();
         this.jumpReleased = this.jumpReleased || !holdingJump;
 
         if (holdingJump) {
@@ -77,29 +85,32 @@ class Player {
             this.jumpHoldTime = 0;
         }
 
-        const newJump = holdingJump && this.jumpReleased && (this.landed || this.sticksToWall);
-        if (newJump) {
+        if (holdingJump && this.canJump) {
             this.jumpReleased = false;
             this.jumpStartY = this.y;
             this.jumpStartTime = this.clock;
 
             if (this.sticksToWall) {
-                this.vX = this.sticksToWall * 800;
+                this.vX = this.lastWallStick.direction * 800;
             }
+
             // Fixes a walljump issue: vY would keep accumulating even though a new jump was
             // started, causing bad physics once the jump reaches its peak.
             this.vY = 0;
+
+            jumpSound();
         }
 
         if (holdingJump && !this.jumpReleased) {
             const jumpHoldRatio = min(this.jumpHoldTime, MAX_JUMP_HOLD_TIME) / MAX_JUMP_HOLD_TIME;
-            const height = CELL_SIZE / 2 + jumpHoldRatio * CELL_SIZE * 3;
+            const steppedRatio = max(0.33, roundToNearest(jumpHoldRatio, 0.33));
+            const height = CELL_SIZE / 2 + steppedRatio * CELL_SIZE * 3;
 
-            this.jumpPeakTime = 0.1 + 0.2 * jumpHoldRatio;
+            this.jumpPeakTime = 0.1 + 0.2 * steppedRatio;
             this.jumpEndY = this.jumpStartY - height;
         }
 
-        if (this.clock < this.jumpStartTime + this.jumpPeakTime) {
+        if (this.isRising) {
             // Rise up
             const jumpRatio = (this.clock - this.jumpStartTime) / this.jumpPeakTime;
             this.y = easeOutQuad(jumpRatio) * (this.jumpEndY - this.jumpStartY) + this.jumpStartY;
@@ -107,16 +118,20 @@ class Player {
             // Fall down
             const gravity = this.sticksToWall && this.vY > 0 ? WALL_GRAVITY_ACCELERATION : GRAVITY_ACCELERATION;
             this.vY = max(0, this.vY + gravity * e);
+            if (this.sticksToWall) {
+                this.vY = min(this.vY, WALL_FALL_DOWN_CAP);
+            }
+
             this.y += this.vY * e;
         }
 
         // Left/right
         let dX = 0, targetVX = 0;
-        if (down[KEYBOARD_LEFT]) {
+        if (INPUT.left()) {
             dX = -1;
             targetVX = -PLAYER_HORIZONTAL_SPEED;
         }
-        if (down[KEYBOARD_RIGHT]) {
+        if (INPUT.right()) {
             dX = 1;
             targetVX = PLAYER_HORIZONTAL_SPEED;
         }
@@ -139,12 +154,19 @@ class Player {
 
         this.readjust();
 
+        if (this.landed) {
+            this.lastLanded.x = this.x;
+            this.lastLanded.y = this.y;
+        }
+
+        // Bandana gravity
+        this.bandanaTrail.forEach(position => position.y += e * 100);
+
         // Bandana
-        // this.bandanaTrail.unshift({'x': this.x - this.facing * 5, 'y': this.y - 10 + rnd(-1, 1)});
-        // while (this.bandanaTrail.length > 30) {
-        //     this.bandanaTrail.pop();
-        // }
-        // this.bandanaTrail.forEach(position => position.y += e * 100);
+        const newTrail = this.bandanaTrail.length > 100 ? this.bandanaTrail.pop() : {};
+        newTrail.x = this.x - this.facing * 5;
+        newTrail.y = this.y - 10 + rnd(-3, 3) * sign(this.vX);
+        this.bandanaTrail.unshift(newTrail);
 
         // Trail
         if (!this.landed && !this.sticksToWall && this.level.clock) {
@@ -165,14 +187,15 @@ class Player {
         }
 
         if (this.sticksToWall) {
-            for (let i = 0 ; i < 10 ; i++)
-            this.level.particle({
-                'size': [6],
-                'color': '#888',
-                'duration': rnd(0.4, 0.8),
-                'x': [this.x - this.sticksToWall * PLAYER_RADIUS, rnd(-20, 20)],
-                'y': [this.y + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-20, 20)]
-            });
+            for (let i = 0 ; i < 10 ; i++) {
+                this.level.particle({
+                    'size': [6],
+                    'color': '#fff',
+                    'duration': rnd(0.4, 0.8),
+                    'x': [this.x - this.sticksToWall * PLAYER_RADIUS, rnd(-20, 20)],
+                    'y': [this.y + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-20, 20)]
+                });
+            }
         }
     }
 
@@ -226,32 +249,31 @@ class Player {
             );
         }
 
-        return snapX.flatMap((x) => {
-            return snapY.map((y) => {
-                return {
+        const res = [];
+        snapX.forEach((x) => snapY.forEach((y) => {
+            if (!hasBlock(x, y, PLAYER_RADIUS)) {
+                res.push({
                     'x': x,
                     'y': y
-                };
-            });
-        }).filter((adjustment) => {
-            return !hasBlock(
-                adjustment.x,
-                adjustment.y,
-                PLAYER_RADIUS
-            );
-        });
+                });
+            }
+        }));
+        return res;
     }
 
     dust(y) {
         for (let i = 0 ; i < 10 ; i++) {
             this.level.particle({
-                'size': [4],
-                'color': '#888',
+                'size': [8],
+                'color': '#fff',
                 'duration': rnd(0.4, 0.8),
-                'x': [this.x + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-10, 10)],
-                'y': [y, sign(this.y - y) * rnd(10, 5)]
+                'x': [this.x + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-20, 20)],
+                'y': [y, sign(this.y - y) * rnd(15, 10)]
             });
         }
+
+        // This function is only called when landing or tapping, we can safely play the sound
+        landSound();
     }
 
     spawn() {
@@ -289,11 +311,36 @@ class Player {
             this.jumpStartTime = -1;
         }
 
-        if (this.x != x && sign(this.x - x) != this.facing) {
-            // Player hit an obstacle, reset horizontal momentum
+        const hitWall = this.x != x;
+        const adjustmentDirectionX = sign(this.x - x)
+
+        // Player hit a wall in the face, reset horizontal momentum
+        if (hitWall && adjustmentDirectionX != sign(this.vX)) {
             this.vX = 0;
         }
 
+        // Player hit a wall and isn't on the floor, stick to the wall
+        if (hitWall && !this.landed) {
+            this.sticksToWall = adjustmentDirectionX;
+        }
+
+        // Player has landed or is moving horizontally without hitting a wall, stop sticking to a wall
+        if (this.landed || this.x != this.previous.x && !hitWall) {
+            this.sticksToWall = 0;
+        }
+
+        // No block on the left or right, cancel wall sticking
+        const leftX = this.x - PLAYER_RADIUS - 1;
+        const rightX = this.x + PLAYER_RADIUS + 1;
+        if (!hasBlock(leftX, this.y) && !hasBlock(rightX, this.y)) {
+            this.sticksToWall = false;
+        }
+
+        if (this.sticksToWall) {
+            this.lastWallStick.x = this.x;
+            this.lastWallStick.y = this.y;
+            this.lastWallStick.direction = this.sticksToWall;
+        }
     }
 
     get renderCharacterParams() {
@@ -304,43 +351,19 @@ class Player {
             this.landed,
             this.facing * this.facingScale,
             this.walking,
-            limit(0, (this.clock - this.jumpStartTime) / this.jumpPeakTime, 1)
+            limit(0, (this.clock - this.jumpStartTime) / this.jumpPeakTime, 1),
+            false
         ];
     }
 
     render() {
-        // Render bandana
-        // R.lineWidth = 8;
-        // R.strokeStyle = '#000';
-        // R.lineJoin = 'round';
-        // beginPath();
-        // moveTo(this.bandanaTrail[0].x, this.bandanaTrail[0].y);
-
-        // let remainingLength = MAX_BANDANA_LENGTH;
-
-        // for (let i = 1 ; i < this.bandanaTrail.length && remainingLength > 0 ; i++) {
-        //     const current = this.bandanaTrail[i];
-        //     const previous = this.bandanaTrail[i - 1];
-
-        //     const actualDistance = dist(current, previous);
-        //     const renderedDist = min(actualDistance, remainingLength);
-        //     remainingLength -= renderedDist;
-        //     const ratio = renderedDist / actualDistance;
-
-        //     // beginPath();
-        //     lineTo(
-        //         previous.x + ratio * (current.x - previous.x),
-        //         previous.y + ratio * (current.y - previous.y)
-        //     );
-        // }
-        // stroke();
+        renderBandana(R, this, this.bandanaTrail);
 
         // Then render the actual character
         wrap(() => {
+            // R.globalAlpha = this.canJump ? 1 : 0.5;
             translate(this.x, this.y);
-
             renderCharacter.apply(null, this.renderCharacterParams);
-            // this.renderCharacter(R);
         });
     }
 }

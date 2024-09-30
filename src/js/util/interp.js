@@ -1,38 +1,35 @@
 linear = t => t;
-easeOutQuad = t => t*(2-t);
-easeOutQuint = t => 1+(--t)*t*t*t*t;
-easeInQuint = t => t*t*t*t*t;
-easeInOutCubic = t => t<.5 ? 4*t*t*t : (t-1)*(2*t-2)*(2*t-2)+1;
+easeOutQuad = t => t * (2 - t);
+easeOutQuint = t => 1 + (--t) * t * t * t * t;
+easeInQuint = t => t * t * t * t * t;
+easeInOutCubic = t => t < .5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1;
 
-interp = (o, p, a, b, d, l, f, e) => {
-    const i = {
-        o: o, // object
-        p: p, // property
-        a: a, // from
-        b: b, // to
-        d: d, // duration
-        l: l || 0, // delay
-        f: f || linear, // easing function
-        e: e || (() => 0), // end callback
-        t: 0,
-        cycle: e => {
-            if (i.l > 0) {
-                i.l -= e;
-                i.o[i.p] = i.a;
-            } else {
-                i.t = min(i.d, i.t + e);
+interp = (
+    obj,
+    property,
+    fromValue,
+    toValue,
+    duration,
+    delay,
+    easing,
+    endCallback
+) => {
+    let progress = 0;
 
-                i.o[i.p] = i.f(i.t / i.d) * (i.b - i.a) + i.a;
-                if (i.t == i.d) {
-                    i.e();
+    const interpolation = {
+        'cycle': e => {
+            progress += e;
 
-                    const index = INTERPOLATIONS.indexOf(i);
-                    if (index >= 0) INTERPOLATIONS.splice(index, 1);
-                }
+            const progressAsRatio = limit(0, (progress - (delay || 0)) / duration, 1);
+            obj[property] = (easing || linear)(progressAsRatio) * (toValue - fromValue) + fromValue;
+
+            if (progressAsRatio >= 1) {
+                remove(INTERPOLATIONS, interpolation);
+                endCallback && endCallback();
             }
         }
     };
-    INTERPOLATIONS.push(i);
+    INTERPOLATIONS.push(interpolation);
 };
 
 INTERPOLATIONS = [];

@@ -26,6 +26,7 @@ class Guard extends PlayerSpotter {
 
         if (facing != this.facing) {
             interp(this, 'facingScale', -1, 1, 0.1);
+            interp(this, 'maxDistance', 0, GUARD_MAX_DISTANCE, 0.2);
         }
     }
 
@@ -42,7 +43,8 @@ class Guard extends PlayerSpotter {
                 true,
                 this.facing * this.facingScale,
                 this.walking,
-                0
+                0,
+                true
             );
         });
     }

@@ -1,8 +1,12 @@
 onload = () => {
-    onresize(); // trigger initial sizing pass
-
     CANVAS.width = CANVAS_WIDTH;
     CANVAS.height = CANVAS_HEIGHT;
+
+    if (navigator.userAgent.match(nomangle(/andro|ipho|ipa|ipo/i))) {
+        CANVAS.height += MOBILE_CONTROLS_HEIGHT;
+    }
+
+    onresize(); // trigger initial sizing pass
 
     R = CANVAS.getContext('2d');
 
@@ -13,24 +17,36 @@ onload = () => {
         }
     });
 
+    // Create the game
     new Game();
 
-    // Start cycle()
-    let lastFrame = Date.now();
-    let frame = () => {
-        let n = Date.now(),
-            e = min((n - lastFrame) / 1000, 1000 / 10);
+    // Run the game at 200 FPS
+    let didCycle = false;
+    loop(
+        (e, fps) => {
+            G.cycle(e);
+            didCycle = true;
 
-        if(DEBUG){
-            G.fps = ~~(1 / e);
-        }
+            if (DEBUG) {
+                G.cycleFps = fps;
+            }
+        },
+        func => setTimeout(func, 1000 / 200)
+    );
 
-        lastFrame = n;
+    // Render at 60 FPS
+    loop(
+        (e, fps) => {
+            // Don't render if nothing was updated
+            if (didCycle) {
+                wrap(() => G.render());
 
-        G.cycle(e);
+                if (DEBUG) {
+                    G.renderFps = fps;
+                }
+            }
+        },
+        func => requestAnimationFrame(func)
+    );
 
-        requestAnimationFrame(frame);
-        // setTimeout(frame, 1000 / 25);
-    };
-    frame();
 };

@@ -1,7 +1,8 @@
 'use strict';
 
-const stripComments = import('strip-comments');
-const escapeStringRegexp = import('escape-string-regexp');
+// Use dynamic import for ES Modules
+const stripCommentsPromise = import('strip-comments');
+const escapeStringRegexpPromise = import('escape-string-regexp');
 
 const encodeNumber = require('../util/encode-number');
 const analyze = require('../util/analyze');
@@ -16,31 +17,40 @@ protectedNames.dom.concat(protectedNames.keywords).forEach((name) => {
     protectedMap[name] = true;
 });
 
-function hasMatch(lines, mangled){
-    const regex = new RegExp('\\b' + escapeStringRegexp(mangled) + '\\b', 'g');
+function hasMatch(lines, mangled) {
+    // Ensure escapeStringRegexp is properly handled
+    return escapeStringRegexpPromise.then(module => {
+        const escapeStringRegexp = module.default || module;
+        const regex = new RegExp('\\b' + escapeStringRegexp(mangled) + '\\b', 'g');
 
-    for(var i = 0 ; i < lines.length ; i++){
-        const matches = lines[i].match(regex) || [];
+        for (var i = 0; i < lines.length; i++) {
+            const matches = lines[i].match(regex) || [];
 
-        if(matches.length){
-            return true;
+            if (matches.length) {
+                return true;
+            }
         }
-    }
 
-    return false;
+        return false;
+    });
 }
 
 function isProtected(mangled) {
     return !!protectedMap[mangled];
 }
 
-class Mangle extends Task{
-    constructor(config){
+class Mangle extends Task {
+    constructor(config) {
         super();
         this.config = config || {};
     }
 
-    execute(input){
+    async execute(input) {
+        const [stripComments, escapeStringRegexp] = await Promise.all([
+            stripCommentsPromise.then(module => module.default || module),
+            escapeStringRegexpPromise.then(module => module.default || module)
+        ]);
+
         // Replacing names that are too common
         const mangledNames = analyze(input, this.config.force || [], this.config.skip || []);
 
@@ -53,30 +63,29 @@ class Mangle extends Task{
 
         const mangleMap = {};
         let mangleIndex = 0;
-        mangledNames.forEach((name) => {
-            while(true){
+        await Promise.all(mangledNames.map(async (name) => {
+            while (true) {
                 const mangled = encodeNumber(mangleIndex++);
 
                 // Check if the mangled name is already in the original input
-                if(!hasMatch(lines, mangled) && !isProtected(mangled)){
+                if (!(await hasMatch(lines, mangled)) && !isProtected(mangled)) {
                     mangleMap[name] = mangled;
                     break;
                 }
             }
-        });
+        }));
 
         const components = split.split(input);
         const nonStringComponents = components.filter((component) => {
             return !component.isString;
         });
 
-        for(let word in mangleMap){
+        for (let word in mangleMap) {
             const mangled = mangleMap[word];
-
             const regex = new RegExp('\\b' + word + '\\b', 'g');
 
             let characterDiff = 0;
-            for(let i = 0 ; i < nonStringComponents.length ; i++){
+            for (let i = 0; i < nonStringComponents.length; i++) {
                 const component = nonStringComponents[i];
                 const lengthBefore = component.content.length;
                 component.content = component.content.replace(regex, mangled);

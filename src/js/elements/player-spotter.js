@@ -7,6 +7,10 @@ class PlayerSpotter {
         this.radius = 0;
     }
 
+    get appliedMaxDistance() {
+        return G.difficulty.visionFactor * this.maxDistance;
+    }
+
     cycle() {
         if (!this.foundPlayer) {
             this.foundPlayer = this.seesPlayer;
@@ -17,6 +21,10 @@ class PlayerSpotter {
     }
 
     get seesPlayer() {
+        if (G.difficulty.noSpotters) {
+            return false;
+        }
+
         // Check if the player is close enough, and within the FOV first
         const angleToPlayer = angleBetween(this, this.level.player);
         const distToPlayer = dist(this, this.level.player);
@@ -29,22 +37,27 @@ class PlayerSpotter {
             return true;
         }
 
-        if (abs(normalize(this.angle - angleToPlayer)) > this.halfFov || distToPlayer > this.maxDistance) {
+        if (abs(normalize(this.angle - angleToPlayer)) > this.halfFov || distToPlayer > this.appliedMaxDistance) {
             return false;
         }
 
-        const impact = castRay(this.x, this.y, angleToPlayer, this.maxDistance);
+        const impact = castRay(this.x, this.y, angleToPlayer, this.appliedMaxDistance);
         return dist(this, impact) >= distToPlayer;
     }
 
     render() {
+        let visionColor = this.foundPlayer ? '#f00': '#ff0';
+        if (G.difficulty.noSpotters) {
+            visionColor = '#888';
+        }
+
         renderVision(
             this.x,
             this.y,
             this.angle - this.halfFov,
             this.angle + this.halfFov,
-            this.maxDistance,
-            this.foundPlayer ? '#f00': '#ff0'
+            this.appliedMaxDistance,
+            visionColor
         );
     }
 }

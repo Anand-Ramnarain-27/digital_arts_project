@@ -1,6 +1,9 @@
 'use strict';
 
-const {LEVEL_COLS, LEVEL_ROWS} = require('../config/constants.json');
+const {
+    LEVEL_COLS,
+    LEVEL_ROWS
+} = require('../config/constants.json');
 
 module.exports = {
     'apply': (input) => {
@@ -10,8 +13,12 @@ module.exports = {
         const rows = matrix.length;
         const cols = matrix[0].length;
 
-        for (let row = 1 ; row < rows - 1 ; row++) {
-            for (let col = 1 ; col < cols - 1 ; col++) {
+        if (rows !== LEVEL_ROWS || cols !== LEVEL_COLS) {
+            throw new Error('Invalid rows or cols');
+        }
+
+        for (let row = 1; row < rows - 1; row++) {
+            for (let col = 1; col < cols - 1; col++) {
                 if (!matrix[row][col]) {
                     continue;
                 }
@@ -33,12 +40,12 @@ module.exports = {
                 // }
 
                 if (verticalLength >= horizontalLength) {
-                    for (let i = 0 ; i < verticalLength ; i++) {
+                    for (let i = 0; i < verticalLength; i++) {
                         matrix[row + i][col] = 0;
                     }
                     lines.push([row, col, verticalLength, 0]);
                 } else {
-                    for (let i = 0 ; i < horizontalLength ; i++) {
+                    for (let i = 0; i < horizontalLength; i++) {
                         matrix[row][col + i] = 0;
                     }
                     lines.push([row, col, 0, horizontalLength]);
@@ -51,37 +58,31 @@ module.exports = {
         //     Math.round(100 * JSON.stringify(lines).length / JSON.stringify(matrix).length) + '%'
         // );
 
-        return `${rows}, ${cols}, ${JSON.stringify(lines)}`;
+        return JSON.stringify(lines);
     },
-    'revert': function(rows, cols, lines) {
-        const result = [];
-        const topAndBottomRow = Array(cols).fill(1);
-        result.push(topAndBottomRow);
-        for (let i = 0 ; i < rows - 2 ; i++) {
-            const row = Array(cols).fill(0);
-            row.length = cols;
+    'revert': function(lines) {
+        const decoded = [];
+        const topAndBottomRow = Array(LEVEL_COLS).fill(1);
+        decoded.push(topAndBottomRow);
+        for (let i = 0; i < LEVEL_ROWS - 2; i++) {
+            const row = Array(LEVEL_COLS).fill(0);
             row[0] = 1;
-            row[cols - 1] = 1;
-            result.push(row);
+            row[LEVEL_COLS - 1] = 1;
+            decoded.push(row);
         }
-        result.push(topAndBottomRow);
+        decoded.push(topAndBottomRow);
 
-        lines.forEach((line) => {
-            let [
-                row,
-                col,
-                verticalLength,
-                horizontalLength
-            ] = line;
-
-            let verticalIncr = !!verticalLength;
-            let horizontalIncr = !!horizontalLength;
-
-            for (let i = 0 ; i < max(verticalLength, horizontalLength) ; i++) {
-                result[row + i * verticalIncr][col + i * horizontalIncr] = 1;
+        lines.forEach(([
+            row,
+            col,
+            verticalLength,
+            horizontalLength
+        ]) => {
+            for (let i = 0; i < max(verticalLength, horizontalLength); i++) {
+                decoded[row + i * !!verticalLength][col + i * !!horizontalLength] = 1;
             }
         });
 
-        return result;
+        return decoded;
     }
 };
