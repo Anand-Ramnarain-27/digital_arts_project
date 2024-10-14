@@ -357,7 +357,7 @@ class Player {
     }
 
     render() {
-        renderBandana(R, this, this.bandanaTrail);
+        //renderBandana(R, this, this.bandanaTrail);
 
         // Then render the actual character
         wrap(() => {
