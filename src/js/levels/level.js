@@ -4,12 +4,60 @@ class Level {
       this.definition = definition;
   
       this.deathCount = 0;
+
+      this.glitchInterval = 30000; // 30 seconds
+      this.glitchTimer = null;
   
       this.backgroundColor = LEVEL_COLORS[index % LEVEL_COLORS.length];
       this.obstacleColor = darken(this.backgroundColor, 0.2);
   
       this.stop();
+      this.startGlitchEffect(); // Start the glitch effect
     }
+
+    startGlitchEffect() {
+        this.glitchTimer = setInterval(() => {
+            this.triggerGlitch();
+        }, this.glitchInterval);
+    }
+
+    triggerGlitch() {
+        // Call the method to apply the glitch effect
+        this.applyGlitchEffect();
+    }
+
+    applyGlitchEffect() {
+        // Randomly select a teleport location
+        const randomPosition = this.getRandomPosition();
+        this.player.moveTo(randomPosition.x, randomPosition.y);
+
+        // Optionally, you can add a visual effect here
+        this.showGlitchEffect();
+    }
+
+    getRandomPosition() {
+        // Define the bounds of the level
+        const xLimit = LEVEL_COLS * CELL_SIZE;
+        const yLimit = LEVEL_ROWS * CELL_SIZE;
+
+        // Generate random coordinates within the level bounds
+        const randomX = Math.floor(Math.random() * (xLimit / CELL_SIZE)) * CELL_SIZE;
+        const randomY = Math.floor(Math.random() * (yLimit / CELL_SIZE)) * CELL_SIZE;
+
+        return { x: randomX, y: randomY };
+    }
+
+    showGlitchEffect() {
+    // Example: briefly change the screen color
+    R.fillStyle = "rgba(255, 0, 0, 0.5)"; // Red tint for glitch
+    R.fillRect(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT); // Cover the entire canvas
+
+    // Reset color after a short duration (you can use a timeout)
+    setTimeout(() => {
+        R.clearRect(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT);
+    }, 100); // Clear after 100ms
+}
+
   
     endWith(f) {
       if (!this.ended) {
@@ -130,6 +178,7 @@ class Level {
     }
   
     stop() {
+      clearInterval(this.glitchTimer);
       this.cyclables = [];
       this.renderables = [];
     }
