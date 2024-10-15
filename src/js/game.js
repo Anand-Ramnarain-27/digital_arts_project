@@ -53,6 +53,12 @@ class Game {
             R.font = INTER_TITLE_FONT;
             G.dust(measureText(G.interTitle).width / 2, INTER_TITLE_Y - 20, 5);
         });
+
+        // Matrix effect properties
+        this.matrix = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789@#$%^&*()*&^%+-/~{[|`]}".split("");
+        this.fontSize = 10;
+        this.columns = Math.floor(CANVAS_WIDTH / this.fontSize);
+        this.drops = Array(this.columns).fill(1); // Start all drops at y = 1
     }
 
     dust(spreadRadius, y, count) {
@@ -239,10 +245,36 @@ class Game {
         return levelIndex * LEVEL_HEIGHT;
     }
 
+    drawMatrixRain(ctx) {
+        // Black BG for the canvas with translucent effect to show trails
+        ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
+        ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+        ctx.fillStyle = "#f4427d"; // Green text color
+        ctx.font = `${this.fontSize}px Arial`;
+
+        for (let i = 0; i < this.drops.length; i++) {
+            // Random character from matrix
+            const text = this.matrix[Math.floor(Math.random() * this.matrix.length)];
+            // Draw the character
+            ctx.fillText(text, i * this.fontSize, this.drops[i] * this.fontSize);
+
+            // Reset drop if it crosses the screen with some randomness
+            if (this.drops[i] * this.fontSize > CANVAS_HEIGHT && Math.random() > 0.975) {
+                this.drops[i] = 0; // Reset to the top
+            }
+
+            // Increment y coordinate
+            this.drops[i]++;
+        }
+    }
+
     render() {
         // Sky
-        fs(SKY_BACKGROUND);
-        fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // TODO maybe split into two?
+        //fs(SKY_BACKGROUND);
+        //fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // TODO maybe split into two?
+
+        this.drawMatrixRain(R);
 
         // Moon
         // wrap(() => {
