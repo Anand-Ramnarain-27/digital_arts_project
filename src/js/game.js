@@ -276,30 +276,6 @@ class Game {
 
         this.drawMatrixRain(R);
 
-        // Moon
-        // wrap(() => {
-        //     fs('#fff');
-        //     fillCircle(CANVAS_WIDTH - 200, 100, 50);
-        // })
-
-        // Thunder
-        // if (G.clock % THUNDER_INTERVAL < 0.3) {
-        //     if (G.clock % 0.1 < 0.05) {
-        //         fs('rgba(255, 255, 255, 0.2)');
-        //         fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-        //     }
-
-        //     R.strokeStyle = '#fff';
-        //     R.lineWidth = 4;
-        //     let x = createNumberGenerator(G.clock / THUNDER_INTERVAL).floating() * CANVAS_WIDTH;
-        //     beginPath();
-        //     for (let y = 0 ; y <= CANVAS_HEIGHT ; y += 40) {
-        //         x += rnd(-40, 40);
-        //         lineTo(x, y);
-        //     }
-        //     stroke();
-        // }
-
         // Buildings in the background
         BUILDINGS_BACKGROUND.forEach((layer, i) => wrap (() => {
             const layerRatio = 0.2 + 0.8 * i / (BUILDINGS_BACKGROUND.length - 1);
@@ -312,29 +288,6 @@ class Game {
             fr(0, 0, CANVAS_WIDTH, layer.height);
         }));
 
-        // Rain
-        // wrap(() => {
-        //     fs('rgba(255,255,255,0.4)');
-        //     const rng = createNumberGenerator(1);
-        //     for (let i = 0 ; i < 200 ; i++) {
-        //         const startX = rng.between(-0.2, 1);
-        //         const startRatio = rng.floating();
-        //         const speed = rng.between(1, 2);
-
-        //         const rainDropAngle = PI * 14 / 32 + rng.between(-1, 1) * PI / 64;
-
-        //         const ratio = (startRatio + G.clock * speed) % 1.2;
-        //         const xRatio = startX + cos(rainDropAngle) * ratio;
-        //         const yRatio = sin(rainDropAngle) * ratio;
-
-        //         wrap(() => {
-        //             translate(xRatio * CANVAS_WIDTH, yRatio * CANVAS_HEIGHT);
-        //             rotate(rainDropAngle);
-        //             fr(0, 0, -RAIN_DROP_LENGTH, 1);
-        //         });
-        //     }
-        // });
-
         // Render the tower
         wrap(() => {
             translate(LEVEL_X, ~~G.bottomScreenAltitude + LEVEL_HEIGHT + TOWER_BASE_HEIGHT);
@@ -346,16 +299,16 @@ class Game {
                 wrap(() => {
                     R.globalAlpha = 0.5;
 
-                    drawImage(
-                        GOD_RAY,
-                        0, 0,
-                        GOD_RAY.width,
-                        GOD_RAY.height / 2,
-                        0,
-                        -100,
-                        LEVEL_WIDTH,
-                        100
-                    );
+                    // drawImage(
+                    //     GOD_RAY,
+                    //     0, 0,
+                    //     GOD_RAY.width,
+                    //     GOD_RAY.height / 2,
+                    //     0,
+                    //     -100,
+                    //     LEVEL_WIDTH,
+                    //     100
+                    // );
                 });
 
                 // Sign holder
@@ -366,49 +319,25 @@ class Game {
                 // });
 
                 // Halo behind the sign
-                [
-                    30,
-                    90,
-                    150,
-                    210
-                ].forEach(x => wrap(() => {
-                    R.globalAlpha = (sin(G.clock * PI * 2 / 2) * 0.5 + 0.5) * 0.1 + 0.2;
-                    drawImage(RED_HALO, LEVEL_WIDTH / 2 + x - RED_HALO.width / 2, -200);
-                    drawImage(RED_HALO, LEVEL_WIDTH / 2 - x - RED_HALO.width / 2, -200);
-                }));
+                // [
+                //     30,
+                //     90,
+                //     150,
+                //     210
+                // ].forEach(x => wrap(() => {
+                //     R.globalAlpha = (sin(G.clock * PI * 2 / 2) * 0.5 + 0.5) * 0.1 + 0.2;
+                //     drawImage(RED_HALO, LEVEL_WIDTH / 2 + x - RED_HALO.width / 2, -200);
+                //     drawImage(RED_HALO, LEVEL_WIDTH / 2 - x - RED_HALO.width / 2, -200);
+                // }));
 
                 // Sign
                 R.textAlign = nomangle('center');
                 R.textBaseline = nomangle('alphabetic');
-                fs('#900');
+                fs('#ffbb33');
                 R.strokeStyle = '#f00';
                 R.lineWidth = 5;
                 R.font = italicFont(96);
                 outlinedText(nomangle('CYBERSPACE'), LEVEL_WIDTH / 2, -30);
-
-                // wrap(() => {
-                //     const ninjaScale = 1.5;
-
-                //     G.bandanaTrail.forEach((item, i, arr) => {
-                //         const ratio = i / arr.length
-                //         const amplitude = 15 * ratio;
-                //         item.y = G.bandanaSource.y - ratio * 30 + sin(-ratio * 20 + G.clock * 35) * amplitude;
-                //     });
-
-                //     scale(1.5, 1.5);
-                //     renderBandana(R, G.bandanaSource, G.bandanaTrail);
-
-                //     translate(HACKER_POSITION.x, HACKER_POSITION.y);
-                //     renderCharacter(
-                //         R,
-                //         G.clock,
-                //         PLAYER_BODY,
-                //         true,
-                //         -1,
-                //         0,
-                //         0
-                //     );
-                // });
             });
 
             // Render the levels
@@ -555,7 +484,7 @@ class Game {
             R.font = TITLE_FONT;
             outlinedText(G.mainTitle, CANVAS_WIDTH / 2, TITLE_Y + G.mainTitleYOffset);
 
-            // "Inter" title (between the title and EVILCORP)
+            // "Inter" title (between the title)
             R.font = INTER_TITLE_FONT;
             R.lineWidth = 2;
             outlinedText(G.interTitle, CANVAS_WIDTH / 2, INTER_TITLE_Y + G.interTitleYOffset);

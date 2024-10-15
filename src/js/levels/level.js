@@ -37,7 +37,7 @@ class Level {
                 nomangle("SYSTEM EXPOSED..."),
                 nomangle("PARTIAL BREACH SUCCESSFUL..."),
               ])
-            : nomangle("SECURITY BREACH COMPLETE: SYSTEM DESTROYED!")
+            : nomangle("SECURITY BREACH: SYSTEM DESTROYED!")
         );
         G.menu.animateIn();
   
