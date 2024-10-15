@@ -22,8 +22,6 @@ class Player {
         this.stickingToWallX = 0;
 
         this.clock = 0;
-
-        this.bandanaTrail = [];
     }
 
     get landed() {
@@ -159,15 +157,6 @@ class Player {
             this.lastLanded.x = this.x;
             this.lastLanded.y = this.y;
         }
-
-        // Bandana gravity
-        this.bandanaTrail.forEach(position => position.y += e * 100);
-
-        // Bandana
-        const newTrail = this.bandanaTrail.length > 100 ? this.bandanaTrail.pop() : {};
-        newTrail.x = this.x - this.facing * 5;
-        newTrail.y = this.y - 10 + rnd(-3, 3) * sign(this.vX);
-        this.bandanaTrail.unshift(newTrail);
 
         // Trail
         if (!this.landed && !this.sticksToWall && this.level.clock) {
@@ -358,12 +347,13 @@ class Player {
     }
 
     render() {
-        //renderBandana(R, this, this.bandanaTrail);
-
+        const glitchOffset = rnd(-2, 2); // Random offset for glitch effect
+        const glitchAlpha = rnd(0.5, 1); // Random alpha for flickering
         // Then render the actual character
         wrap(() => {
-            // R.globalAlpha = this.canJump ? 1 : 0.5;
-            translate(this.x, this.y);
+            R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
+            translate(this.x + glitchOffset, this.y + glitchOffset);
+            //translate(this.x, this.y);
             renderCharacter.apply(null, this.renderCharacterParams);
         });
     }
