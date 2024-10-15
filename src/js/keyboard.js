@@ -1,3 +1,4 @@
+//keyboard.js
 down = {};
 onkeydown = e => {
     down[e.keyCode] = true;

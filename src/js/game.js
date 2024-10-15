@@ -1,3 +1,4 @@
+//game.js
 const HACKER_POSITION = {
     'x': LEVEL_WIDTH / 2 + 30,
     'y': -PLAYER_RADIUS

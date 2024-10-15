@@ -1,3 +1,4 @@
+//player-spotter.js
 class PlayerSpotter {
     constructor(level) {
         this.level = level;

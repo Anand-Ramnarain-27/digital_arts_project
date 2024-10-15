@@ -1,3 +1,4 @@
+//guard.js
 class Guard extends PlayerSpotter {
     constructor(level, cycleDefinition) {
         super(level);

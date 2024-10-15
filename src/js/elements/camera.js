@@ -1,3 +1,4 @@
+//camera.js
 class Camera extends PlayerSpotter {
     constructor(level, cycleDefinition) {
         super(level);
