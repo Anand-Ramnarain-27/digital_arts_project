@@ -269,12 +269,42 @@ class Game {
         }
     }
 
+    drawGrid(ctx) {
+        const gridSize = 50; // Size of each grid cell
+        const vanishingPointX = CANVAS_WIDTH / 2;
+        const vanishingPointY = CANVAS_HEIGHT / 2;
+    
+        ctx.strokeStyle = "#00FF00"; // Grid line color
+        ctx.lineWidth = 1; // Line thickness
+    
+        // Draw perspective lines from the bottom to the base of the buildings
+        for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
+            ctx.beginPath();
+            ctx.moveTo(x, CANVAS_HEIGHT); // Start from the bottom
+            ctx.lineTo(vanishingPointX, vanishingPointY); // Draw to the vanishing point
+            ctx.stroke();
+        }
+    
+        // Draw horizontal lines for the floor
+        for (let y = vanishingPointY; y < CANVAS_HEIGHT; y += gridSize) {
+            const leftX = vanishingPointX - ((vanishingPointY - y) * (vanishingPointX / vanishingPointY));
+            const rightX = vanishingPointX + ((vanishingPointY - y) * (vanishingPointX / vanishingPointY));
+    
+            ctx.beginPath();
+            ctx.moveTo(leftX, y); // Start from the left point
+            ctx.lineTo(rightX, y); // Draw to the right point
+            ctx.stroke();
+        }
+    }
+    
     render() {
         // Sky
         //fs(SKY_BACKGROUND);
         //fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // TODO maybe split into two?
 
         this.drawMatrixRain(R);
+
+        this.drawGrid(R);
 
         // Buildings in the background
         BUILDINGS_BACKGROUND.forEach((layer, i) => wrap (() => {

@@ -1,7 +1,8 @@
+//background.js
 BUILDINGS_BACKGROUND = [
-    ['#000', 600],
-    ['#000', 500],
-    ['#000', 300]
+    ['#000', 450],
+    // ['#000', 500],
+    // ['#00f', 300]
 ].map(([color, patternHeight]) => createCanvasPattern(400, patternHeight, (c, can) => {
     c.fs(color);
 
@@ -21,3 +22,6 @@ SKY_BACKGROUND = createCanvas(1, CANVAS_HEIGHT, (c) => {
     gradient.addColorStop(0.7, '#000');
     return gradient;
 });
+
+
+
