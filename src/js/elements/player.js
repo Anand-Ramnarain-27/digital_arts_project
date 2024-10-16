@@ -352,13 +352,13 @@ class Player {
     }
 
     render() {
-        //const glitchOffset = rnd(-2, 2); // Random offset for glitch effect
-        //const glitchAlpha = rnd(0.5, 1); // Random alpha for flickering
+        const glitchOffset = rnd(-2, 2); // Random offset for glitch effect
+        const glitchAlpha = rnd(0.5, 1); // Random alpha for flickering
         // Then render the actual character
         wrap(() => {
-            //R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
-            //translate(this.x + glitchOffset, this.y + glitchOffset);
-            translate(this.x, this.y);
+            R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
+            translate(this.x + glitchOffset, this.y + glitchOffset);
+            //translate(this.x, this.y);
             renderCharacter.apply(null, this.renderCharacterParams);
         });
     }
