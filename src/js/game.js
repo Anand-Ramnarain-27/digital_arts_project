@@ -6,6 +6,8 @@ const HACKER_POSITION = {
 const TITLE_FONT = italicFont(120);
 const INTER_TITLE_FONT = italicFont(24);
 
+const buildingVisibilityThresholds = [MAX_LEVEL_ALTITUDE, MAX_LEVEL_ALTITUDE * 0.75, MAX_LEVEL_ALTITUDE * 0.5];
+
 class Game {
 
     constructor() {
@@ -274,7 +276,7 @@ class Game {
         const vanishingPointX = CANVAS_WIDTH / 2;
         const vanishingPointY = CANVAS_HEIGHT / 2;
     
-        ctx.strokeStyle = "#00FF00"; // Grid line color
+        ctx.strokeStyle = '#00f'; // Grid line color
         ctx.lineWidth = 1; // Line thickness
     
         // Draw perspective lines from the bottom to the base of the buildings
@@ -312,10 +314,24 @@ class Game {
 
             const altitudeRatio = G.bottomScreenAltitude / MAX_LEVEL_ALTITUDE;
 
-            fs(layer);
-            translate(0, ~~(CANVAS_HEIGHT - layer.height + altitudeRatio * layerRatio * 400));
+            if (G.bottomScreenAltitude >= MAX_LEVEL_ALTITUDE) {
+                fs(layer);
+                translate(0, ~~(CANVAS_HEIGHT - layer.height + altitudeRatio * layerRatio * 400));
+                fr(0, 0, CANVAS_WIDTH, layer.height);
+            }
+        }));
 
-            fr(0, 0, CANVAS_WIDTH, layer.height);
+        // Buildings in the background
+        BUILDINGS_BACKGROUNDS.forEach((layer, i) => wrap (() => {
+            const layerRatio = 0.2 + 0.8 * i / (BUILDINGS_BACKGROUNDS.length - 1);
+
+            const altitudeRatio = G.bottomScreenAltitude / MAX_LEVEL_ALTITUDE;
+
+            if (G.bottomScreenAltitude < buildingVisibilityThresholds[i]) {
+                fs(layer);
+                translate(0, ~~(CANVAS_HEIGHT - layer.height + altitudeRatio * layerRatio * 400));
+                fr(0, 0, CANVAS_WIDTH, layer.height);
+            }
         }));
 
         // Render the tower
