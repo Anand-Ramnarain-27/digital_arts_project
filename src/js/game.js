@@ -182,7 +182,6 @@ class Game {
         G.mainTitle = nomangle('YOU BEAT');
         G.interTitle = '';
 
-        // Trophies for OS13K (not checking if the player changed difficulty just so they can win trophies more easily)
         const hardTrophy = G.difficulty == HARD_DIFFICULTY;
         const normalTrophy = G.difficulty == NORMAL_DIFFICULTY || hardTrophy;
 
@@ -252,41 +251,37 @@ class Game {
         ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        ctx.fillStyle = "#f4427d"; // Green text color
+        ctx.fillStyle = "#f4427d"; 
         ctx.font = `${this.fontSize}px Arial`;
 
         for (let i = 0; i < this.drops.length; i++) {
             // Random character from matrix
             const text = this.matrix[Math.floor(Math.random() * this.matrix.length)];
-            // Draw the character
             ctx.fillText(text, i * this.fontSize, this.drops[i] * this.fontSize);
 
-            // Reset drop if it crosses the screen with some randomness
             if (this.drops[i] * this.fontSize > CANVAS_HEIGHT && Math.random() > 0.975) {
                 this.drops[i] = 0; // Reset to the top
             }
-
-            // Increment y coordinate
             this.drops[i]++;
         }
     }
 
     drawGrid(ctx) {
-        const gridSize = 50; // Size of each grid cell
+        const gridSize = 50; 
         const vanishingPointX = CANVAS_WIDTH / 2;
         const vanishingPointY = CANVAS_HEIGHT / 2;
 
-        ctx.fillStyle = '#fff'; // Change this to your desired background color #333333
+        ctx.fillStyle = '#fff'; //background #333333
         ctx.fillRect(0, CANVAS_HEIGHT / 2, CANVAS_WIDTH, CANVAS_HEIGHT/2);
 
-        ctx.strokeStyle = '#00f'; // Grid line color
-        ctx.lineWidth = 1; // Line thickness
+        ctx.strokeStyle = '#00f';
+        ctx.lineWidth = 1; 
     
         // Draw perspective lines from the bottom to the base of the buildings
         for (let x = 0; x <= CANVAS_WIDTH; x += gridSize) {
             ctx.beginPath();
-            ctx.moveTo(x, CANVAS_HEIGHT); // Start from the bottom
-            ctx.lineTo(vanishingPointX, vanishingPointY); // Draw to the vanishing point
+            ctx.moveTo(x, CANVAS_HEIGHT); 
+            ctx.lineTo(vanishingPointX, vanishingPointY); 
             ctx.stroke();
         }
     
@@ -296,8 +291,8 @@ class Game {
             const rightX = vanishingPointX + ((vanishingPointY - y) * (vanishingPointX / vanishingPointY));
     
             ctx.beginPath();
-            ctx.moveTo(leftX, y); // Start from the left point
-            ctx.lineTo(rightX, y); // Draw to the right point
+            ctx.moveTo(leftX, y); 
+            ctx.lineTo(rightX, y); 
             ctx.stroke();
         }
     }
@@ -324,7 +319,6 @@ class Game {
 
         this.drawMatrixRain(R);
 
-        // Buildings in the background
         BUILDINGS_BACKGROUNDS.forEach((layer, i) => wrap (() => {
             const layerRatio = 0.2 + 0.8 * i / (BUILDINGS_BACKGROUNDS.length - 1);
 

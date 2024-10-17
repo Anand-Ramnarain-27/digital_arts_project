@@ -267,7 +267,6 @@ class Player {
             });
         }
 
-        // This function is only called when landing or tapping, we can safely play the sound
         landSound();
     }
 
@@ -351,14 +350,23 @@ class Player {
         ];
     }
 
+    showGlitchEffect() {
+        this.isGlitching = true; 
+    }
+
+    removeGlitchEffect() {
+        this.isGlitching = false; 
+    }
+
     render() {
-        const glitchOffset = rnd(-2, 2); // Random offset for glitch effect
-        const glitchAlpha = rnd(0.5, 1); // Random alpha for flickering
-        // Then render the actual character
+        const glitchOffset = rnd(-2, 2); 
+        const glitchAlpha = rnd(0.5, 1);
         wrap(() => {
-            R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
-            translate(this.x + glitchOffset, this.y + glitchOffset);
-            //translate(this.x, this.y);
+            if(this.isGlitching){
+               R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
+               translate(this.x + glitchOffset, this.y + glitchOffset); 
+            }else
+            translate(this.x, this.y);
             renderCharacter.apply(null, this.renderCharacterParams);
         });
     }
