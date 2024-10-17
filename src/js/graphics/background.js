@@ -13,7 +13,7 @@ const BUILDINGS_BACKGROUND = [
 
         // Draw the glowing outline
         c.fs('#00f'); // Tron blue color
-        c.fr(x - 2, buildingHeight - 2, buildingWidth + 4, patternHeight + 4); // Slightly larger for glow effect
+        c.fr(x - 2, buildingHeight-2, buildingWidth + 4, patternHeight + 4); // Slightly larger for glow effect
 
         // Draw the building itself
         c.fs(color);
@@ -37,7 +37,7 @@ const tronColors = [
 ];
 
 BUILDINGS_BACKGROUNDS = [
-     ['#000', 600],
+     ['#000', 650],
      ['#000', 500],
      ['#000', 300]
 ].map(([color, patternHeight]) => createCanvasPattern(400, patternHeight, (c, can) => {

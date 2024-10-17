@@ -275,7 +275,10 @@ class Game {
         const gridSize = 50; // Size of each grid cell
         const vanishingPointX = CANVAS_WIDTH / 2;
         const vanishingPointY = CANVAS_HEIGHT / 2;
-    
+
+        ctx.fillStyle = '#fff'; // Change this to your desired background color #333333
+        ctx.fillRect(0, CANVAS_HEIGHT / 2, CANVAS_WIDTH, CANVAS_HEIGHT/2);
+
         ctx.strokeStyle = '#00f'; // Grid line color
         ctx.lineWidth = 1; // Line thickness
     
@@ -304,8 +307,6 @@ class Game {
         //fs(SKY_BACKGROUND);
         //fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // TODO maybe split into two?
 
-        this.drawMatrixRain(R);
-
         this.drawGrid(R);
 
         // Buildings in the background
@@ -320,6 +321,8 @@ class Game {
                 fr(0, 0, CANVAS_WIDTH, layer.height);
             }
         }));
+
+        this.drawMatrixRain(R);
 
         // Buildings in the background
         BUILDINGS_BACKGROUNDS.forEach((layer, i) => wrap (() => {
