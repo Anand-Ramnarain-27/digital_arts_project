@@ -1,3 +1,4 @@
+//gamepad.js
 gamepads = () => (navigator.getGamepads ? Array.from(navigator.getGamepads()) : []).filter(x => !!x);
 
 isGamepadButtonPressed = buttonIndex => {
