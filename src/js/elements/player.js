@@ -22,6 +22,8 @@ class Player {
         this.stickingToWallX = 0;
 
         this.clock = 0;
+
+        this.isGravityInverted = false; 
     }
 
     get landed() {
@@ -83,114 +85,228 @@ class Player {
         const holdingJump = INPUT.jump();
         this.jumpReleased = this.jumpReleased || !holdingJump;
 
-        if (holdingJump) {
-            this.jumpHoldTime += e;
-        } else {
-            this.jumpHoldTime = 0;
-        }
-
-        if (holdingJump && this.canJump) {
-            this.jumpReleased = false;
-            this.jumpStartY = this.y;
-            this.jumpStartTime = this.clock;
-
-            if (this.sticksToWall) {
-                this.vX = this.lastWallStick.direction * 800;
+        if(this.isGravityInverted){
+            if (holdingJump) {
+                this.jumpHoldTime += e;
+            } else {
+                this.jumpHoldTime = 0;
             }
-
-            // Fixes a walljump issue: vY would keep accumulating even though a new jump was
-            // started, causing bad physics once the jump reaches its peak.
-            this.vY = 0;
-
-            jumpSound();
-        }
-
-        if (holdingJump && !this.jumpReleased) {
-            const jumpHoldRatio = min(this.jumpHoldTime, MAX_JUMP_HOLD_TIME) / MAX_JUMP_HOLD_TIME;
-            const steppedRatio = max(0.33, roundToNearest(jumpHoldRatio, 0.33));
-            const height = CELL_SIZE / 2 + steppedRatio * CELL_SIZE * 3;
-
-            this.jumpPeakTime = 0.1 + 0.2 * steppedRatio;
-            this.jumpEndY = this.jumpStartY - height;
-        }
-
-        if (this.isRising) {
-            // Rise up
-            const jumpRatio = (this.clock - this.jumpStartTime) / this.jumpPeakTime;
-            this.y = easeOutQuad(jumpRatio) * (this.jumpEndY - this.jumpStartY) + this.jumpStartY;
-        } else {
-            // Fall down
-            const gravity = this.sticksToWall && this.vY > 0 ? WALL_GRAVITY_ACCELERATION : GRAVITY_ACCELERATION;
-            this.vY = max(0, this.vY + gravity * e);
-            if (this.sticksToWall) {
-                this.vY = min(this.vY, WALL_FALL_DOWN_CAP);
-            }
-
-            this.y += this.vY * e;
-        }
-
-        // Left/right
-        let dX = 0, targetVX = 0;
-        if (INPUT.left()) {
-            dX = -1;
-            targetVX = -PLAYER_HORIZONTAL_SPEED;
-        }
-        if (INPUT.right()) {
-            dX = 1;
-            targetVX = PLAYER_HORIZONTAL_SPEED;
-        }
-
-        if (this.landed && dX) {
-            this.facing = dX;
-        }
-        if (this.facing != this.previous.facing) {
-            interp(this, 'facingScale', -1, 1, 0.1);
-        }
-        this.walking = dX;
-
-        const horizontalAcceleration = this.landed ? PLAYER_HORIZONTAL_FLOOR_ACCELERATION : PLAYER_HORIZONTAL_FLIGHT_ACCELERATION;
-        this.vX += limit(
-            -horizontalAcceleration * e,
-            targetVX - this.vX,
-            horizontalAcceleration * e
-        );
-        this.x += this.vX * e;
-
-        this.readjust();
-
-        if (this.landed) {
-            this.lastLanded.x = this.x;
-            this.lastLanded.y = this.y;
-        }
-
-        // Trail
-        if (!this.landed && !this.sticksToWall && this.level.clock) {
-            const { renderCharacterParams, x, y } = this;
-
-            const renderable = {
-                'render': () => {
-                    R.globalAlpha = renderable.alpha;
-                    translate(x, y);
-                    renderCharacter.apply(null, renderCharacterParams);
+    
+            if (holdingJump && this.canJump) {
+                this.jumpReleased = false;
+                this.jumpStartY = this.y;
+                this.jumpStartTime = this.clock;
+    
+                if (this.sticksToWall) {
+                    this.vX = this.lastWallStick.direction * 800;
                 }
-            };
-
-            this.level.renderables.push(renderable);
-            interp(renderable, 'alpha', 0.1, 0, 0.5, 0.2, null, () => {
-                remove(this.level.renderables, renderable);
-            });
-        }
-
-        if (this.sticksToWall) {
-            for (let i = 0 ; i < 10 ; i++) {
-                this.level.particle({
-                    'size': [6],
-                    'color': '#fff',
-                    'duration': rnd(0.4, 0.8),
-                    'x': [this.x - this.sticksToWall * PLAYER_RADIUS, rnd(-20, 20)],
-                    'y': [this.y + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-20, 20)]
+    
+                // Fixes a walljump issue: vY would keep accumulating even though a new jump was
+                // started, causing bad physics once the jump reaches its peak.
+                this.vY = 0;
+    
+                jumpSound();
+            }
+    
+            if (holdingJump && !this.jumpReleased) {
+                const jumpHoldRatio = min(this.jumpHoldTime, MAX_JUMP_HOLD_TIME) / MAX_JUMP_HOLD_TIME;
+                const steppedRatio = max(0.33, roundToNearest(jumpHoldRatio, 0.33));
+                const height = CELL_SIZE / 2 + steppedRatio * CELL_SIZE * 3;
+    
+                this.jumpPeakTime = 0.1 + 0.2 * steppedRatio;
+                this.jumpEndY = this.jumpStartY + height;
+            }
+    
+            if (this.isRising) {
+                // Rise up
+                const jumpRatio = (this.clock - this.jumpStartTime) / this.jumpPeakTime;
+                this.y = easeOutQuad(jumpRatio) * (this.jumpEndY - this.jumpStartY) + this.jumpStartY;
+            } else {
+                // Fall down
+                const gravity = this.sticksToWall && this.vY > 0 ? WALL_GRAVITY_ACCELERATION : -GRAVITY_ACCELERATION;
+                this.vY = min(0, this.vY + gravity * e);
+                if (this.sticksToWall) {
+                    this.vY = min(this.vY, -WALL_FALL_DOWN_CAP);
+                }
+    
+                this.y += this.vY * e;
+            }
+    
+            // Left/right
+            let dX = 0, targetVX = 0;
+            if (INPUT.left()) {
+                dX = -1;
+                targetVX = -PLAYER_HORIZONTAL_SPEED;
+            }
+            if (INPUT.right()) {
+                dX = 1;
+                targetVX = PLAYER_HORIZONTAL_SPEED;
+            }
+    
+            if (this.landed && dX) {
+                this.facing = dX;
+            }
+            if (this.facing != this.previous.facing) {
+                interp(this, 'facingScale', -1, 1, 0.1);
+            }
+            this.walking = dX;
+    
+            const horizontalAcceleration = this.landed ? PLAYER_HORIZONTAL_FLOOR_ACCELERATION : PLAYER_HORIZONTAL_FLIGHT_ACCELERATION;
+            this.vX += limit(
+                -horizontalAcceleration * e,
+                targetVX - this.vX,
+                horizontalAcceleration * e
+            );
+            this.x += this.vX * e;
+    
+            this.readjust();
+    
+            if (this.landed) {
+                this.lastLanded.x = this.x;
+                this.lastLanded.y = this.y;
+            }
+    
+            // Trail
+            if (!this.landed && !this.sticksToWall && this.level.clock) {
+                const { renderCharacterParams, x, y } = this;
+    
+                const renderable = {
+                    'render': () => {
+                        R.globalAlpha = renderable.alpha;
+                        translate(x, y);
+                        renderCharacter.apply(null, renderCharacterParams);
+                    }
+                };
+    
+                this.level.renderables.push(renderable);
+                interp(renderable, 'alpha', 0.1, 0, 0.5, 0.2, null, () => {
+                    remove(this.level.renderables, renderable);
                 });
             }
+    
+            if (this.sticksToWall) {
+                for (let i = 0 ; i < 10 ; i++) {
+                    this.level.particle({
+                        'size': [6],
+                        'color': '#fff',
+                        'duration': rnd(0.4, 0.8),
+                        'x': [this.x - this.sticksToWall * PLAYER_RADIUS, rnd(-20, 20)],
+                        'y': [this.y + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-20, 20)]
+                    });
+                }
+            }
+
+        }else{
+            if (holdingJump) {
+                this.jumpHoldTime += e;
+            } else {
+                this.jumpHoldTime = 0;
+            }
+    
+            if (holdingJump && this.canJump) {
+                this.jumpReleased = false;
+                this.jumpStartY = this.y;
+                this.jumpStartTime = this.clock;
+    
+                if (this.sticksToWall) {
+                    this.vX = this.lastWallStick.direction * 800;
+                }
+    
+                // Fixes a walljump issue: vY would keep accumulating even though a new jump was
+                // started, causing bad physics once the jump reaches its peak.
+                this.vY = 0;
+    
+                jumpSound();
+            }
+    
+            if (holdingJump && !this.jumpReleased) {
+                const jumpHoldRatio = min(this.jumpHoldTime, MAX_JUMP_HOLD_TIME) / MAX_JUMP_HOLD_TIME;
+                const steppedRatio = max(0.33, roundToNearest(jumpHoldRatio, 0.33));
+                const height = CELL_SIZE / 2 + steppedRatio * CELL_SIZE * 3;
+    
+                this.jumpPeakTime = 0.1 + 0.2 * steppedRatio;
+                this.jumpEndY = this.jumpStartY - height;
+            }
+    
+            if (this.isRising) {
+                // Rise up
+                const jumpRatio = (this.clock - this.jumpStartTime) / this.jumpPeakTime;
+                this.y = easeOutQuad(jumpRatio) * (this.jumpEndY - this.jumpStartY) + this.jumpStartY;
+            } else {
+                // Fall down
+                const gravity = this.sticksToWall && this.vY > 0 ? WALL_GRAVITY_ACCELERATION : GRAVITY_ACCELERATION;
+                this.vY = max(0, this.vY + gravity * e);
+                if (this.sticksToWall) {
+                    this.vY = min(this.vY, WALL_FALL_DOWN_CAP);
+                }
+    
+                this.y += this.vY * e;
+            }
+    
+            // Left/right
+            let dX = 0, targetVX = 0;
+            if (INPUT.left()) {
+                dX = -1;
+                targetVX = -PLAYER_HORIZONTAL_SPEED;
+            }
+            if (INPUT.right()) {
+                dX = 1;
+                targetVX = PLAYER_HORIZONTAL_SPEED;
+            }
+    
+            if (this.landed && dX) {
+                this.facing = dX;
+            }
+            if (this.facing != this.previous.facing) {
+                interp(this, 'facingScale', -1, 1, 0.1);
+            }
+            this.walking = dX;
+    
+            const horizontalAcceleration = this.landed ? PLAYER_HORIZONTAL_FLOOR_ACCELERATION : PLAYER_HORIZONTAL_FLIGHT_ACCELERATION;
+            this.vX += limit(
+                -horizontalAcceleration * e,
+                targetVX - this.vX,
+                horizontalAcceleration * e
+            );
+            this.x += this.vX * e;
+    
+            this.readjust();
+    
+            if (this.landed) {
+                this.lastLanded.x = this.x;
+                this.lastLanded.y = this.y;
+            }
+    
+            // Trail
+            if (!this.landed && !this.sticksToWall && this.level.clock) {
+                const { renderCharacterParams, x, y } = this;
+    
+                const renderable = {
+                    'render': () => {
+                        R.globalAlpha = renderable.alpha;
+                        translate(x, y);
+                        renderCharacter.apply(null, renderCharacterParams);
+                    }
+                };
+    
+                this.level.renderables.push(renderable);
+                interp(renderable, 'alpha', 0.1, 0, 0.5, 0.2, null, () => {
+                    remove(this.level.renderables, renderable);
+                });
+            }
+    
+            if (this.sticksToWall) {
+                for (let i = 0 ; i < 10 ; i++) {
+                    this.level.particle({
+                        'size': [6],
+                        'color': '#fff',
+                        'duration': rnd(0.4, 0.8),
+                        'x': [this.x - this.sticksToWall * PLAYER_RADIUS, rnd(-20, 20)],
+                        'y': [this.y + rnd(-PLAYER_RADIUS, PLAYER_RADIUS), rnd(-20, 20)]
+                    });
+                }
+            }
+
         }
     }
 
