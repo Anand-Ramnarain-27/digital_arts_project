@@ -14,6 +14,7 @@ onkeydown = e => {
 
     if (e.keyCode == 69) {  // 69 is the keyCode for 'E'
         console.log('The E button was pressed');
+        G.activateEMP();
     }
 
     if (e.keyCode == 71) {  // 71is the keyCode for 'G'

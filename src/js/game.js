@@ -8,6 +8,16 @@ const INTER_TITLE_FONT = italicFont(24);
 
 const buildingVisibilityThresholds = [MAX_LEVEL_ALTITUDE, MAX_LEVEL_ALTITUDE * 0.75, MAX_LEVEL_ALTITUDE * 0.5];
 
+let config;
+let originalFOV;
+let originalMaxDistance;
+
+fetch('./constants/constants.json')
+    .then(response => response.json())
+    .then(data => {
+        config = data;
+    });
+
 class Game {
 
     constructor() {
@@ -61,6 +71,29 @@ class Game {
         this.fontSize = 10;
         this.columns = Math.floor(CANVAS_WIDTH / this.fontSize);
         this.drops = Array(this.columns).fill(1); // Start all drops at y = 1
+
+        this.isEMPActive = false;
+        this.empDuration = 5000; 
+    }
+
+    activateEMP() {
+        if (!this.isEMPActive) {
+            this.isEMPActive = true;
+            console.log("EMP Activated!");
+
+            // Disable cameras, guards, and lights
+
+
+            // // Set a timeout to deactivate EMP after the duration
+            setTimeout(() => this.deactivateEMP(), this.empDuration);
+        }
+    }
+
+    deactivateEMP() {
+        this.isEMPActive = false;
+        console.log("EMP Deactivated!");
+
+        // Re-enable the detection systems
     }
 
     dust(spreadRadius, y, count) {
