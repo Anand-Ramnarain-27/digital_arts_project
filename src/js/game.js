@@ -433,6 +433,7 @@ class Game {
 
         fs('#fff');
 
+       //Left Arrow
         wrap(() => {
             R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_LEFT];
             translate(CANVAS_WIDTH / 8, CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2);
@@ -440,20 +441,61 @@ class Game {
             renderMobileArrow();
         });
 
+        //Right Arrow
         wrap(() => {
             R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_RIGHT];
             translate(CANVAS_WIDTH * 3 / 8, CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2);
             renderMobileArrow();
         });
 
+        //Jump
         wrap(() => {
             R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_SPACE];
             fillCircle(
-                evaluate(CANVAS_WIDTH * 3 / 4),
+                evaluate(CANVAS_WIDTH * 2.5 / 4),
                 evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
                 evaluate(MOBILE_BUTTON_SIZE / 2)
             );
         });
+
+        // Button for 'E'
+        wrap(() => {
+            R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_E];
+            fillCircle(
+                evaluate(CANVAS_WIDTH * 3.8 / 4),
+                evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
+                evaluate(MOBILE_BUTTON_SIZE / 2)
+            );
+            R.font = "bold 30px Arial"; // Example font settings
+            R.fillStyle = "white"; // Text color
+            R.textAlign = "center"; // Center the text
+            R.textBaseline = "middle"; // Middle align the text
+            R.fillText(
+                "E",
+                evaluate(CANVAS_WIDTH * 3.8 / 4),
+                evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2)
+            );
+        });
+
+        // Button for 'G'
+        wrap(() => {
+            R.globalAlpha = 0.5 + 0.5 * !!down[KEYBOARD_G];
+            fillCircle(
+                evaluate(CANVAS_WIDTH * 3.3 / 4),
+                evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
+                evaluate(MOBILE_BUTTON_SIZE / 2)
+            );
+            R.font = "bold 30px Arial"; // Example font settings
+            R.fillStyle = "white"; // Text color
+            R.textAlign = "center"; // Center the text
+            R.textBaseline = "middle"; // Middle align the text
+            R.fillText(
+                "G",
+                evaluate(CANVAS_WIDTH * 3.3 / 4),
+                evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2)
+            );
+        });
+
 
         // HUD
         const hudItems = [

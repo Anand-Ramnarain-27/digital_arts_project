@@ -4,6 +4,6 @@ INPUT = {
     'left': () => down[KEYBOARD_LEFT] || down[KEYBOARD_A] || down[KEYBOARD_Q] || isGamepadButtonPressed(14) || isGamepadAxisNearValue(0, -1),
     'right': () => down[KEYBOARD_RIGHT] || down[KEYBOARD_D] || isGamepadButtonPressed(15) || isGamepadAxisNearValue(0, 1),
     'emp':()=>down[KEYBOARD_E],
-    'gravity':()=>down[KEYBOARD_R],
+    'gravity':()=>down[KEYBOARD_G],
 
 };

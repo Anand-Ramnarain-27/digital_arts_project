@@ -16,8 +16,8 @@ onkeydown = e => {
         console.log('The E button was pressed');
     }
 
-    if (e.keyCode == 82) {  // 82 is the keyCode for 'R'
-        console.log('The R button was pressed');
+    if (e.keyCode == 71) {  // 71is the keyCode for 'G'
+        console.log('The G button was pressed');
     }
 };
 onkeyup = e => {
