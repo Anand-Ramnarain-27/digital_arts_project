@@ -94,6 +94,7 @@ class Game {
     inverseGravity(){
         if (!this.isGravityInversed) {
             this.isGravityInversed = true;
+            console.log("Gravity is inversed");
 
         setTimeout(() => this.resetGravity(), this.inverseDuration);
         }
@@ -101,6 +102,7 @@ class Game {
 
     resetGravity(){
         this.isGravityInversed = false;
+        console.log("Gravity is normal");
 
     }
 
