@@ -65,7 +65,7 @@ class Game {
         this.isEMPActive = false;
         this.empDuration = 5000; 
 
-        this.isGravityInversed = false;
+        G.isGravityInversed = false;
         this.inverseDuration = 5000; 
     }
 
@@ -92,8 +92,8 @@ class Game {
     }
 
     inverseGravity(){
-        if (!this.isGravityInversed) {
-            this.isGravityInversed = true;
+        if (!G.isGravityInversed) {
+            G.isGravityInversed = true;
             console.log("Gravity is inversed");
 
         setTimeout(() => this.resetGravity(), this.inverseDuration);
@@ -101,7 +101,7 @@ class Game {
     }
 
     resetGravity(){
-        this.isGravityInversed = false;
+        G.isGravityInversed = false;
         console.log("Gravity is normal");
 
     }

@@ -71,7 +71,8 @@ renderCharacter = (
   jumpRatio,
   isGuard // Pass this as true for the guard, false for the player
 ) => {
-  context.scale(facing, 1);
+
+  context.scale(facing, G.isGravityInversed ? -1 : 1);
 
   wrap(() => {
     // Bobbing effect for walking
