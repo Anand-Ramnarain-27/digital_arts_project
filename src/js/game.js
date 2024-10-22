@@ -72,18 +72,22 @@ class Game {
             console.log("EMP Activated!");
 
             // Disable cameras, guards, and lights
+            G.level = LEVELS[G.level.index];
+            G.level.activatesEMP();
 
 
             // // Set a timeout to deactivate EMP after the duration
-            setTimeout(() => this.deactivateEMP(), this.empDuration);
+            setTimeout(() => this.deactivatesEMP(), this.empDuration);
         }
     }
 
-    deactivateEMP() {
+    deactivatesEMP() {
         this.isEMPActive = false;
         console.log("EMP Deactivated!");
 
         // Re-enable the detection systems
+        G.level = LEVELS[G.level.index];
+        G.level.deactivatesEMP();
     }
 
     dust(spreadRadius, y, count) {

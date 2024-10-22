@@ -7,6 +7,18 @@ class Camera extends PlayerSpotter {
         this.halfFov = CAMERA_HALF_FOV;
     }
 
+    activatedEMP() {
+        console.log("EMP activated for this camera");
+         this.maxDistance = 0; 
+         this.halfFov = 0; 
+    }
+
+    deactivatedEMP() {
+        console.log("EMP deactivated for this camera");
+        this.maxDistance = CAMERA_MAX_DISTANCE; 
+        this.halfFov = CAMERA_HALF_FOV;
+    }
+
     cycle(e) {
         if (!this.foundPlayer) {
             this.cycleDefinition.update(this, this.level.clock);

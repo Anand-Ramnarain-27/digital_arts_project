@@ -10,6 +10,16 @@ class Guard extends PlayerSpotter {
         this.radius = evaluate(PLAYER_RADIUS / 2);
     }
 
+    activatedEMP() {
+        this.maxDistance = 0; 
+        this.halfFov = 0; 
+    }
+
+    deactivatedEMP() {
+        this.maxDistance = GUARD_MAX_DISTANCE;
+        this.halfFov = GUARD_HALF_FOV;
+    }
+
     cycle(e) {
         const { facing } = this;
 

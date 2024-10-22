@@ -13,8 +13,37 @@ class Level {
     this.backgroundColor = LEVEL_COLORS[index % LEVEL_COLORS.length];
     this.obstacleColor = darken(this.backgroundColor, 0.2);
 
+    this.cam = this.definition.cameras.map(camera => camera);
+    this.guardz = definition.guards.map(guard => guard);
+
     this.stop();
     //this.startGlitchEffect(); // Start the glitch effect
+  }
+
+  activatesEMP() {
+    this.cam.forEach(camera => {
+        if (camera instanceof Camera) { 
+            camera.activatedEMP(); 
+        }
+    });
+    this.guardz.forEach(guard =>{
+      if(guard instanceof Guard){
+        guard.activatedEMP();
+      }
+    });
+  } 
+
+  deactivatesEMP() {
+    this.cam.forEach(camera => {
+      if (camera instanceof Camera) {
+          camera.deactivatedEMP(); 
+      }
+  });
+  this.guardz.forEach(guard =>{
+    if(guard instanceof Guard){
+      guard.deactivatedEMP();
+    }
+  });
   }
 
   startGlitchEffect() {
@@ -173,12 +202,14 @@ class Level {
       const camera = new Camera(this, cameraDefinition);
       this.cyclables.push(camera);
       this.renderables.push(camera);
+      this.cam.push(camera);
     });
 
     this.definition.guards.forEach((guardDefinition) => {
       const guard = new Guard(this, guardDefinition);
       this.cyclables.push(guard);
       this.renderables.push(guard);
+      this.guardz.push(guard);
     });
 
     // Give cyclables a cycle so they're in place
