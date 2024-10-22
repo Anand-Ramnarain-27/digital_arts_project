@@ -26,7 +26,7 @@ LEVELS = [
         'spawn': [16, 2],
         'exit': [5, 17],
         'message': [3, nomangle('PRESS [SPACE] TO JUMP, HOLD TO JUMP HIGHER')],
-        'cameras': [new CameraCycle(16, 9.5, PI / 2),],
+        'cameras': [],
         'guards': []
     },
 

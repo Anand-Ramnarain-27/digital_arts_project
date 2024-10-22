@@ -69,7 +69,6 @@ class Game {
     activateEMP() {
         if (!this.isEMPActive) {
             this.isEMPActive = true;
-            console.log("EMP Activated!");
 
             // Disable cameras, guards, and lights
             G.level = LEVELS[G.level.index];
@@ -83,7 +82,6 @@ class Game {
 
     deactivatesEMP() {
         this.isEMPActive = false;
-        console.log("EMP Deactivated!");
 
         // Re-enable the detection systems
         G.level = LEVELS[G.level.index];
