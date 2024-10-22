@@ -8,16 +8,6 @@ const INTER_TITLE_FONT = italicFont(24);
 
 const buildingVisibilityThresholds = [MAX_LEVEL_ALTITUDE, MAX_LEVEL_ALTITUDE * 0.75, MAX_LEVEL_ALTITUDE * 0.5];
 
-let config;
-let originalFOV;
-let originalMaxDistance;
-
-fetch('./constants/constants.json')
-    .then(response => response.json())
-    .then(data => {
-        config = data;
-    });
-
 class Game {
 
     constructor() {
