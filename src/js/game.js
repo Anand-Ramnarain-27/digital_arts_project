@@ -64,6 +64,9 @@ class Game {
 
         this.isEMPActive = false;
         this.empDuration = 5000; 
+
+        this.isGravityInversed = false;
+        this.inverseDuration = 5000; 
     }
 
     activateEMP() {
@@ -86,6 +89,19 @@ class Game {
         // Re-enable the detection systems
         G.level = LEVELS[G.level.index];
         G.level.deactivatesEMP();
+    }
+
+    inverseGravity(){
+        if (!this.isGravityInversed) {
+            this.isGravityInversed = true;
+
+        setTimeout(() => this.resetGravity(), this.inverseDuration);
+        }
+    }
+
+    resetGravity(){
+        this.isGravityInversed = false;
+
     }
 
     dust(spreadRadius, y, count) {

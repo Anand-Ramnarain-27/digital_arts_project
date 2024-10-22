@@ -18,6 +18,7 @@ onkeydown = e => {
 
     if (e.keyCode == 71) {  // 71is the keyCode for 'G'
         console.log('The G button was pressed');
+        G.inverseGravity();
     }
 };
 onkeyup = e => {
