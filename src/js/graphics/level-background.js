@@ -28,16 +28,6 @@ darken = (color, amount = 0.5) => {
     return '#' + (amount * r << 16 | amount * g << 8 | amount * b).toString(16).padStart(6, '0');
 };
 
-// document.body.appendChild(createCanvas(LEVEL_COLORS.length * 100, 200, (c) => {
-//     LEVEL_COLORS.forEach((color, i) => {
-//         c.fillStyle = color;
-//         c.fillRect(i * 100, 0, 100, 100);
-//
-//         c.fillStyle = darken(color);
-//         c.fillRect(i * 100, 100, 100, 100);
-//     });
-// }));
-
 createLevelBackground = (level) => createCanvas(LEVEL_WIDTH, LEVEL_WIDTH, (c, can) => {
     c.fs('#000'); // Black background for the level
     c.fr(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT);
@@ -121,40 +111,6 @@ createLevelBackground = (level) => createCanvas(LEVEL_WIDTH, LEVEL_WIDTH, (c, ca
             const above = taken[row - 1][col];
             const belowBelow = taken[row + 2] && taken[row + 2][col];
             const belowRight = taken[row + 1][col + 1];
-
-            // Trash and outlets just need floor
-            // if (!current && below) {
-            //     maybeAdd(TRASH);
-            //     maybeAdd(OUTLET);
-            // }
-
-            // Lights need a ceiling to hang onto
-            // if (matrix[row - 1][col] && !matrix[row][col] && !matrix[row + 1][col] && !(col % 2)) {
-            //     // No need to take extra room for lights
-            //     c.drawImage(
-            //         LIGHT,
-            //         (col + 0.5) * CELL_SIZE - LIGHT.width / 2,
-            //         row * CELL_SIZE
-            //     );
-            // }
-
-            // Frames and windows need two rows
-            // if (!below && belowBelow) {
-            //     maybeAdd(FRAME);
-            //     maybeAdd(WINDOW, (x, y) => {
-            //         c.clearRect(
-            //             x + (CELL_SIZE - UNPADDED_WINDOW.width) / 2,
-            //             y + (CELL_SIZE * 2 - UNPADDED_WINDOW.height) / 2,
-            //             UNPADDED_WINDOW.width,
-            //             UNPADDED_WINDOW.height
-            //         );
-            //     });
-            // }
-
-            // Desks need one row but two columns
-            // if (below && !right && belowRight) {
-            //     maybeAdd(DESK);
-            // }
         }
     }
 });

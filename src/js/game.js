@@ -34,11 +34,6 @@ class Game {
         G.mainTitleYOffset = 1;
         G.interTitleYOffset = 1;
 
-        G.bandanaSource = {'x': HACKER_POSITION.x, 'y': HACKER_POSITION.y - 10};
-        G.bandanaTrail = Array(~~(MAX_BANDANA_LENGTH / MAIN_MENU_BANDANA_X_INTERVAL)).fill(0).map((x, i) => {
-            return { 'x': G.bandanaSource.x + PLAYER_RADIUS / 2 + i * MAIN_MENU_BANDANA_X_INTERVAL};
-        })
-
         G.mainTitle = nomangle('HACKER');
         G.interTitle = nomangle('VS');
 
@@ -64,13 +59,13 @@ class Game {
 
         this.isEMPActive = false;
         this.empDuration = 5000; 
-        this.empCooldown = 30000;//120000;
+        this.empCooldown = 120000;
         this.lastEmpActivationTime = 0;
 
 
         G.isGravityInversed = false;
         this.inverseDuration = 5000; 
-        this.gravityCooldown = 30000;//120000;
+        this.gravityCooldown = 120000;
         this.lastInverseActivationTime = 0;
     }
 
@@ -312,7 +307,7 @@ class Game {
         ctx.fillStyle = "rgba(0, 0, 0, 0.04)";
         ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
 
-        ctx.fillStyle = "#f4427d"; 
+        ctx.fillStyle = "#FF0000"; 
         ctx.font = `${this.fontSize}px Arial`;
 
         for (let i = 0; i < this.drops.length; i++) {
@@ -332,7 +327,7 @@ class Game {
         const vanishingPointX = CANVAS_WIDTH / 2;
         const vanishingPointY = CANVAS_HEIGHT / 2;
 
-        ctx.fillStyle = '#fff'; //background #333333
+        ctx.fillStyle = '#000'; //background #333333
         ctx.fillRect(0, CANVAS_HEIGHT / 2, CANVAS_WIDTH, CANVAS_HEIGHT/2);
 
         ctx.strokeStyle = '#00f';
@@ -359,9 +354,6 @@ class Game {
     }
     
     render() {
-        // Sky
-        //fs(SKY_BACKGROUND);
-        //fr(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT); // TODO maybe split into two?
 
         this.drawGrid(R);
 
@@ -402,37 +394,7 @@ class Game {
 
                 wrap(() => {
                     R.globalAlpha = 0.5;
-
-                    // drawImage(
-                    //     GOD_RAY,
-                    //     0, 0,
-                    //     GOD_RAY.width,
-                    //     GOD_RAY.height / 2,
-                    //     0,
-                    //     -100,
-                    //     LEVEL_WIDTH,
-                    //     100
-                    // );
                 });
-
-                // Sign holder
-                // wrap(() => {
-                //     translate(LEVEL_WIDTH / 2 - CELL_SIZE * 6, 0);
-                //     fs(SIGN_HOLDER_PATTERN);
-                //     fr(0, 0, CELL_SIZE * 12, -CELL_SIZE * 2);
-                // });
-
-                // Halo behind the sign
-                // [
-                //     30,
-                //     90,
-                //     150,
-                //     210
-                // ].forEach(x => wrap(() => {
-                //     R.globalAlpha = (sin(G.clock * PI * 2 / 2) * 0.5 + 0.5) * 0.1 + 0.2;
-                //     drawImage(RED_HALO, LEVEL_WIDTH / 2 + x - RED_HALO.width / 2, -200);
-                //     drawImage(RED_HALO, LEVEL_WIDTH / 2 - x - RED_HALO.width / 2, -200);
-                // }));
 
                 // Sign
                 R.textAlign = nomangle('center');
@@ -452,14 +414,6 @@ class Game {
                     LEVELS[i].render();
                 });
             }
-
-            // Render the windows in front
-            // R.globalAlpha = G.windowsAlpha;
-            // fs(BUILDING_PATTERN);
-            // wrap(() => {
-            //     // translate(-CELL_SIZE / 2, 0);
-            //     fr(0, 0, LEVEL_WIDTH, -MAX_LEVEL_ALTITUDE - LEVEL_HEIGHT);
-            // });
 
         });
 
@@ -527,10 +481,10 @@ class Game {
                 evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
                 evaluate(MOBILE_BUTTON_SIZE / 2)
             );
-            R.font = "bold 30px Arial"; // Example font settings
-            R.fillStyle = "white"; // Text color
-            R.textAlign = "center"; // Center the text
-            R.textBaseline = "middle"; // Middle align the text
+            R.font = "bold 30px Arial";
+            R.fillStyle = "white"; 
+            R.textAlign = "center";
+            R.textBaseline = "middle";
             R.fillText(
                 "E",
                 evaluate(CANVAS_WIDTH * 3.8 / 4),
@@ -546,10 +500,10 @@ class Game {
                 evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
                 evaluate(MOBILE_BUTTON_SIZE / 2)
             );
-            R.font = "bold 30px Arial"; // Example font settings
-            R.fillStyle = "white"; // Text color
-            R.textAlign = "center"; // Center the text
-            R.textBaseline = "middle"; // Middle align the text
+            R.font = "bold 30px Arial"; 
+            R.fillStyle = "white"; 
+            R.textAlign = "center"; 
+            R.textBaseline = "middle";
             R.fillText(
                 "G",
                 evaluate(CANVAS_WIDTH * 3.3 / 4),
@@ -598,11 +552,9 @@ class Game {
             R.textBaseline = nomangle('middle');
             fs('#fff');
 
-            // Label
             R.font = italicFont(18);
             shadowedText(label, 20, 30 + i * 90);
 
-            // Value
             R.font = font(36);
             shadowedText(value, 20, 30 + 40 + i * 90);
         }));

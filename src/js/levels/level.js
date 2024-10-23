@@ -85,15 +85,24 @@ class Level {
   }
 
   getRandomPosition() {
-    const xLimit = LEVEL_COLS * CELL_SIZE;
-    const yLimit = LEVEL_ROWS * CELL_SIZE;
+    const validPositions = [];
+    // Collect all valid positions (cells with value 0)
+    for (let row = 0; row < LEVEL_ROWS; row++) {
+      for (let col = 0; col < LEVEL_COLS; col++) {
+          if (this.definition.matrix[row][col] === 0) {
+              validPositions.push({ x: col * CELL_SIZE, y: row * CELL_SIZE });
+          }
+      }
+  }
 
-    const randomX =
-      Math.floor(Math.random() * (xLimit / CELL_SIZE)) * CELL_SIZE;
-    const randomY =
-      Math.floor(Math.random() * (yLimit / CELL_SIZE)) * CELL_SIZE;
+  // Select a random position from the valid positions
+  if (validPositions.length > 0) {
+      const randomIndex = Math.floor(Math.random() * validPositions.length);
+      return validPositions[randomIndex];
+  }
 
-    return { x: randomX, y: randomY };
+  // Fallback to a default position if no valid positions are found
+  return { x: 0, y: 0 }; // Or any other default position you prefer
   }
 
   showGlitchEffect() {

@@ -24,16 +24,20 @@ const BUILDINGS_BACKGROUND = [
 }));
 
 const tronColors = [
-    '#00FFFF', // Cyan
-    '#FF4500',
-    '#00BFFF', // Deep Sky Blue
-    '#FF1493', // Deep Pink
-    '#1E90FF', // Dodger Blue
-    '#FF00FF', // Magenta
-    '#0000FF', // Blue
-    '#FFFF00', // Yellow
-    '#8A2BE2', // Blue Violet
-    '#ADFF2F', // Green Yellow
+    '#00f',
+    '#00f',
+    '#00f',
+    '#00f',
+    // '#00FFFF', // Cyan
+    // '#FF4500',
+    // '#00BFFF', // Deep Sky Blue
+    // '#FF1493', // Deep Pink
+    // '#1E90FF', // Dodger Blue
+    // '#FF00FF', // Magenta
+    // '#0000FF', // Blue
+    // '#FFFF00', // Yellow
+    // '#8A2BE2', // Blue Violet
+    // '#ADFF2F', // Green Yellow
 ];
 
 BUILDINGS_BACKGROUNDS = [

@@ -143,28 +143,4 @@ renderHelmet = (context) => {
     context.fillRect(bodyWidth / 2 - 10, 3, 20, 4);  // Visor
 };
 
-renderBandana = (context, characterPosition, bandanaTrail) => {
-  R.lineWidth = 8;
-  R.strokeStyle = "#000";
-  R.lineJoin = "round";
-  beginPath();
-  moveTo(characterPosition.x, characterPosition.y);
 
-  let remainingLength = MAX_BANDANA_LENGTH;
-
-  for (let i = 0; i < bandanaTrail.length && remainingLength > 0; i++) {
-    const current = bandanaTrail[i];
-    const previous = bandanaTrail[i - 1] || characterPosition;
-
-    const actualDistance = dist(current, previous);
-    const renderedDist = min(actualDistance, remainingLength);
-    remainingLength -= renderedDist;
-    const ratio = renderedDist / actualDistance;
-
-    lineTo(
-      previous.x + ratio * (current.x - previous.x),
-      previous.y + ratio * (current.y - previous.y)
-    );
-  }
-  stroke();
-};
