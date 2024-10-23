@@ -73,6 +73,7 @@ class Game {
         const currentTime = Date.now();
         if (!this.isEMPActive && (currentTime - this.lastEmpActivationTime) >= this.empCooldown) {
             this.isEMPActive = true;
+            empSound();
 
             // Disable cameras, guards, and lights
             G.level = LEVELS[G.level.index];
@@ -101,6 +102,7 @@ class Game {
         const currentTime = Date.now();
         if (!G.isGravityInversed && (currentTime - this.lastInverseActivationTime) >= this.gravityCooldown) {
             G.isGravityInversed = true;
+            gravitySound();
 
             this.lastInverseActivationTime = currentTime;
             console.log("Gravity is inversed");

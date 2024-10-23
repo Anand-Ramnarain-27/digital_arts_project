@@ -17,3 +17,6 @@ jumpSound = sound([rawFile('config/sounds/jump')]);
 landSound = sound([rawFile('config/sounds/land')]);
 nextLevelSound = sound([rawFile('config/sounds/next-level')]);
 notFoundSound = sound([rawFile('config/sounds/not-found')]);
+empSound = sound([rawFile('config/sounds/emp')]);
+gravitySound = sound([rawFile('config/sounds/gravity')]);
+noSound = sound([rawFile('config/sounds/no-sound')]);

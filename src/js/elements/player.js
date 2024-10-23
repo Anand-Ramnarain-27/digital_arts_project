@@ -22,8 +22,6 @@ class Player {
     this.stickingToWallX = 0;
 
     this.clock = 0;
-
-    this.isGravityInverted = true;
   }
 
   get landed() {
@@ -403,6 +401,9 @@ class Player {
         y: [y, sign(this.y - y) * rnd(15, 10)],
       });
     }
+    if(G.isGravityInversed){
+      noSound();
+    }else
 
     landSound();
   }
