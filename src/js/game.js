@@ -64,13 +64,13 @@ class Game {
 
         this.isEMPActive = false;
         this.empDuration = 5000; 
-        this.empCooldown = 120000;
+        this.empCooldown = 30000;//120000;
         this.lastEmpActivationTime = 0;
 
 
         G.isGravityInversed = false;
         this.inverseDuration = 5000; 
-        this.gravityCooldown = 120000;
+        this.gravityCooldown = 30000;//120000;
         this.lastInverseActivationTime = 0;
     }
 
@@ -573,8 +573,17 @@ class Game {
                 formatTime(G.timer)
             ]);
             hudItems.push([
-                nomangle('SPECIAL ABILITIES:')
-            ])
+                nomangle('SPECIAL ABILITIES:') + nomangle(' EMP'),
+                this.isEMPActive 
+                    ? nomangle('IN USE') 
+                    : (Date.now() - this.lastEmpActivationTime >= this.empCooldown ? nomangle('READY') : nomangle('COOLDOWN'))
+            ]);
+            hudItems.push([
+                nomangle('SPECIAL ABILITIES:') + nomangle(' GRAVITY'),
+                G.isGravityInversed
+                    ? nomangle('IN USE') 
+                    : (Date.now() - this.lastInverseActivationTime >= this.gravityCooldown ? nomangle('READY') : nomangle('COOLDOWN'))
+            ]);
         }
 
         hudItems.push([
@@ -597,6 +606,8 @@ class Game {
             R.font = font(36);
             shadowedText(value, 20, 30 + 40 + i * 90);
         }));
+
+        
 
         // Gamepad info
         R.textAlign = nomangle('right');
