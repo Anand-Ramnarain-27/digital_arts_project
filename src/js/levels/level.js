@@ -316,6 +316,36 @@ class Level {
       fillText(message, LEVEL_WIDTH / 2, toMiddleCellCoord(row));
     });
 
+    wrap(() => {
+      const ratio = limit(0, (this.clock - LEVEL_MESSAGE_DELAY) * 3, 1);
+      R.globalAlpha = ratio;
+      translate(0, (1 - ratio) * -10);
+
+      const [row, messages] = this.definition.messages || [0, ""];
+      R.textAlign = "center";
+      R.textBaseline = "middle";
+      R.fs("rgba(255,255,255,0.7)");
+      R.shadowColor = "#00ffcc";
+      R.shadowBlur = 5;
+      R.font = font(26);
+      fillText(messages, LEVEL_WIDTH / 2, toMiddleCellCoord(row));
+    });
+
+    wrap(() => {
+      const ratio = limit(0, (this.clock - LEVEL_MESSAGE_DELAY) * 3, 1);
+      R.globalAlpha = ratio;
+      translate(0, (1 - ratio) * -10);
+
+      const [row, messagez] = this.definition.messagez || [0, ""];
+      R.textAlign = "center";
+      R.textBaseline = "middle";
+      R.fs("rgba(255,255,255,0.7)");
+      R.shadowColor = "#00ffcc";
+      R.shadowBlur = 5;
+      R.font = font(26);
+      fillText(messagez, LEVEL_WIDTH / 2, toMiddleCellCoord(row));
+    });
+
     this.renderables.forEach((x) => wrap(() => x.render()));
 
     // Matrix (Rendering Black Tiles with Neon Borders)
