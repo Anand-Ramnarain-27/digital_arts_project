@@ -313,6 +313,9 @@ class Game {
         for (let i = 0; i < this.drops.length; i++) {
             // Random character from matrix
             const text = this.matrix[Math.floor(Math.random() * this.matrix.length)];
+            if(G.isGravityInversed){
+                ctx.fillText(text, i * this.fontSize, CANVAS_HEIGHT - this.drops[i] * this.fontSize);
+            }else
             ctx.fillText(text, i * this.fontSize, this.drops[i] * this.fontSize);
 
             if (this.drops[i] * this.fontSize > CANVAS_HEIGHT && Math.random() > 0.975) {
