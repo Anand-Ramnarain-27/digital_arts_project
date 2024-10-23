@@ -64,22 +64,33 @@ class Game {
 
         this.isEMPActive = false;
         this.empDuration = 5000; 
+        this.empCooldown = 120000;
+        this.lastEmpActivationTime = 0;
+
 
         G.isGravityInversed = false;
         this.inverseDuration = 5000; 
+        this.gravityCooldown = 120000;
+        this.lastInverseActivationTime = 0;
     }
 
     activateEMP() {
-        if (!this.isEMPActive) {
+        const currentTime = Date.now();
+        if (!this.isEMPActive && (currentTime - this.lastEmpActivationTime) >= this.empCooldown) {
             this.isEMPActive = true;
 
             // Disable cameras, guards, and lights
             G.level = LEVELS[G.level.index];
             G.level.activatesEMP();
 
+            this.lastEmpActivationTime = currentTime;
 
             // // Set a timeout to deactivate EMP after the duration
             setTimeout(() => this.deactivatesEMP(), this.empDuration);
+        }else if (this.isEMPActive) {
+            console.log("EMP is still active!");
+        } else {
+            console.log("EMP is on cooldown!");
         }
     }
 
@@ -92,11 +103,18 @@ class Game {
     }
 
     inverseGravity(){
-        if (!G.isGravityInversed) {
+        const currentTime = Date.now();
+        if (!G.isGravityInversed && (currentTime - this.lastInverseActivationTime) >= this.gravityCooldown) {
             G.isGravityInversed = true;
+
+            this.lastInverseActivationTime = currentTime;
             console.log("Gravity is inversed");
 
         setTimeout(() => this.resetGravity(), this.inverseDuration);
+        }else if ( G.isGravityInversed) {
+            console.log("Gravity is still inverse!");
+        } else {
+            console.log("Gravity Inverse is on cooldown!");
         }
     }
 
@@ -554,6 +572,9 @@ class Game {
                 nomangle('TIME' ) + (G.wasDifficultyChangedDuringRun ? nomangle(' (INVALIDATED):') : ':'),
                 formatTime(G.timer)
             ]);
+            hudItems.push([
+                nomangle('SPECIAL ABILITIES:')
+            ])
         }
 
         hudItems.push([
