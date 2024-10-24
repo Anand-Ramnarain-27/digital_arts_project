@@ -6,8 +6,8 @@ class Level {
 
     this.deathCount = 0;
 
-    this.glitchInterval = 30000;
-    this.glitchPlayerInterval = 20000;
+    this.glitchInterval = 60000;
+    this.glitchPlayerInterval = 50000;
     this.glitchTimer = null;
 
     this.backgroundColor = LEVEL_COLORS[index % LEVEL_COLORS.length];
