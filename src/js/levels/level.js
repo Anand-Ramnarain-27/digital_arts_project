@@ -6,9 +6,9 @@ class Level {
 
     this.deathCount = 0;
 
-    this.glitchInterval = 60000;
-    this.glitchPlayerInterval = 50000;
-    this.glitchTimer = null;
+    // this.glitchInterval = 60000;
+    // this.glitchPlayerInterval = 50000;
+    // this.glitchTimer = null;
 
     this.backgroundColor = LEVEL_COLORS[index % LEVEL_COLORS.length];
     this.obstacleColor = darken(this.backgroundColor, 0.2);
@@ -46,73 +46,73 @@ class Level {
   });
   }
 
-  startGlitchEffect() {
-    if (this.started)
-      this.glitchTimer = setInterval(() => {
-        this.triggerGlitch();
-      }, this.glitchInterval);
-  }
+  // startGlitchEffect() {
+  //   if (this.started)
+  //     this.glitchTimer = setInterval(() => {
+  //       this.triggerGlitch();
+  //     }, this.glitchInterval);
+  // }
 
-  startPlayerGiltchEffect(){
-    if (this.started)
-      this.glitchTimer = setInterval(() => {
-        this.triggerPlayerGlitchEffect();
-      }, this.glitchPlayerInterval);
-  }
+  // startPlayerGiltchEffect(){
+  //   if (this.started)
+  //     this.glitchTimer = setInterval(() => {
+  //       this.triggerPlayerGlitchEffect();
+  //     }, this.glitchPlayerInterval);
+  // }
 
-  triggerPlayerGlitchEffect() {
-    this.applyPlayerGlitchEffect();
-  }
+  // triggerPlayerGlitchEffect() {
+  //   this.applyPlayerGlitchEffect();
+  // }
 
-  applyPlayerGlitchEffect() {
-    this.player.showGlitchEffect();
+  // applyPlayerGlitchEffect() {
+  //   this.player.showGlitchEffect();
 
-    setTimeout(() => {
-      this.player.removeGlitchEffect();
-    }, 10000);
-  }
+  //   setTimeout(() => {
+  //     this.player.removeGlitchEffect();
+  //   }, 10000);
+  // }
 
-  triggerGlitch() {
-    this.applyGlitchEffect();
-  }
+  // triggerGlitch() {
+  //   this.applyGlitchEffect();
+  // }
 
-  applyGlitchEffect() {
-    // Randomly select a teleport location
-    const randomPosition = this.getRandomPosition();
-    this.player.moveTo(randomPosition.x, randomPosition.y);
+  // applyGlitchEffect() {
+  //   // Randomly select a teleport location
+  //   const randomPosition = this.getRandomPosition();
+  //   this.player.moveTo(randomPosition.x, randomPosition.y);
 
-    this.showGlitchEffect();
-  }
+  //   this.showGlitchEffect();
+  // }
 
-  getRandomPosition() {
-    const validPositions = [];
-    // Collect all valid positions (cells with value 0)
-    for (let row = 0; row < LEVEL_ROWS; row++) {
-      for (let col = 0; col < LEVEL_COLS; col++) {
-          if (this.definition.matrix[row][col] === 0) {
-              validPositions.push({ x: col * CELL_SIZE, y: row * CELL_SIZE });
-          }
-      }
-  }
+  // getRandomPosition() {
+  //   const validPositions = [];
+  //   // Collect all valid positions (cells with value 0)
+  //   for (let row = 0; row < LEVEL_ROWS; row++) {
+  //     for (let col = 0; col < LEVEL_COLS; col++) {
+  //         if (this.definition.matrix[row][col] === 0) {
+  //             validPositions.push({ x: col * CELL_SIZE, y: row * CELL_SIZE });
+  //         }
+  //     }
+  // }
 
-  // Select a random position from the valid positions
-  if (validPositions.length > 0) {
-      const randomIndex = Math.floor(Math.random() * validPositions.length);
-      return validPositions[randomIndex];
-  }
+  // // Select a random position from the valid positions
+  // if (validPositions.length > 0) {
+  //     const randomIndex = Math.floor(Math.random() * validPositions.length);
+  //     return validPositions[randomIndex];
+  // }
 
-  // Fallback to a default position if no valid positions are found
-  return { x: 0, y: 0 }; // Or any other default position you prefer
-  }
+  // // Fallback to a default position if no valid positions are found
+  // return { x: 0, y: 0 }; // Or any other default position you prefer
+  // }
 
-  showGlitchEffect() {
-    R.fillStyle = "rgba(255, 0, 0, 0.5)";
-    R.fillRect(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT);
+  // showGlitchEffect() {
+  //   R.fillStyle = "rgba(255, 0, 0, 0.5)";
+  //   R.fillRect(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT);
 
-    setTimeout(() => {
-      R.clearRect(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT);
-    }, 500);
-  }
+  //   setTimeout(() => {
+  //     R.clearRect(0, 0, LEVEL_WIDTH, LEVEL_HEIGHT);
+  //   }, 500);
+  // }
 
   endWith(f) {
     if (!this.ended) {
@@ -232,8 +232,8 @@ class Level {
 
     this.player.spawn();
     this.renderables.push(this.player);
-    this.startGlitchEffect();
-    this.startPlayerGiltchEffect();
+    // this.startGlitchEffect();
+    // this.startPlayerGiltchEffect();
   }
 
   stop() {

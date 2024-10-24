@@ -488,23 +488,24 @@ class Player {
     ];
   }
 
-  showGlitchEffect() {
-    this.isGlitching = true;
-  }
+  // showGlitchEffect() {
+  //   this.isGlitching = true;
+  // }
 
-  removeGlitchEffect() {
-    this.isGlitching = false;
-  }
+  // removeGlitchEffect() {
+  //   this.isGlitching = false;
+  // }
 
   render() {
-    const glitchOffset = rnd(-2, 2);
-    const glitchAlpha = rnd(0.5, 1);
-    wrap(() => {
-      if (this.isGlitching) {
-        R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
-        translate(this.x + glitchOffset, this.y + glitchOffset);
-      } else translate(this.x, this.y);
-      renderCharacter.apply(null, this.renderCharacterParams);
-    });
+    // const glitchOffset = rnd(-2, 2);
+    // const glitchAlpha = rnd(0.5, 1);
+    // wrap(() => {
+    //   if (this.isGlitching) {
+    //     R.globalAlpha = this.canJump ? glitchAlpha : 0.5;
+    //     translate(this.x + glitchOffset, this.y + glitchOffset);
+    //   } else 
+    translate(this.x, this.y);
+    renderCharacter.apply(null, this.renderCharacterParams);
+    //});
   }
 }
