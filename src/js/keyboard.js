@@ -16,7 +16,7 @@ onkeydown = e => {
         G.activateEMP();
     }
 
-    if (e.keyCode == 71) {  // 71is the keyCode for 'G'
+    if (e.keyCode == 71 || e.keyCode == 81) {  // 71is the keyCode for 'G'
         console.log('The G button was pressed');
         G.inverseGravity();
     }

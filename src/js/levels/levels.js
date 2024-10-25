@@ -87,7 +87,7 @@ LEVELS = [
         'spawn': [16, 2],
         'exit': [13, 17],
         'message': [2, nomangle('TRY OUT SPECIAL ABILITIES')],
-        'messages': [3, nomangle('PRESS [G] TO ACTIVATE GRAVITY MANIPULATION')],
+        'messages': [3, nomangle('PRESS [G] OR [Q] TO ACTIVATE GRAVITY MANIPULATION')],
         'messagez': [7, nomangle('PRESS [E] TO ACTIVATE THE EMP')],
         'cameras': [new CameraCycle(10, 9.5, PI / 2),
             new CameraCycle(13, 6, PI / 2),
