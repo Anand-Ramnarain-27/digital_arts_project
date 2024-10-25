@@ -12,11 +12,11 @@ onkeydown = e => {
         G.mainMenu();
     }
 
-    if (e.keyCode == 69) {  // 69 is the keyCode for 'E'
+    if (INPUT.emp()) {  // 69 is the keyCode for 'E'
         G.activateEMP();
     }
 
-    if (e.keyCode == 71 || e.keyCode == 81) {  // 71is the keyCode for 'G'
+    if (INPUT.gravity()) {  // 71is the keyCode for 'G'
         console.log('The G button was pressed');
         G.inverseGravity();
     }
