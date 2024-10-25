@@ -105,7 +105,6 @@ class Game {
             gravitySound();
 
             this.lastInverseActivationTime = currentTime;
-            console.log("Gravity is inversed");
 
         setTimeout(() => this.resetGravity(), this.inverseDuration);
         }else if ( G.isGravityInversed) {
@@ -117,8 +116,6 @@ class Game {
 
     resetGravity(){
         G.isGravityInversed = false;
-        console.log("Gravity is normal");
-
     }
 
     dust(spreadRadius, y, count) {
