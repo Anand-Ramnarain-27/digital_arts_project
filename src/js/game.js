@@ -264,6 +264,15 @@ class Game {
         if (INPUT.jump()) {
             G.startAnimation();
         }
+        
+        if (INPUT.emp()) {  // Check for EMP activation
+            G.activateEMP();
+        }
+    
+        if (INPUT.gravity()) {  // Check for gravity inversion
+            G.inverseGravity();
+        }
+    
 
         G.level.cycle(e);
         INTERPOLATIONS.slice().forEach(i => i.cycle(e));
