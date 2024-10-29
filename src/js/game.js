@@ -482,6 +482,15 @@ class Game {
                 evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2),
                 evaluate(MOBILE_BUTTON_SIZE / 2)
             );
+            R.font = "bold 30px Arial";
+            R.fillStyle = "white"; 
+            R.textAlign = "center";
+            R.textBaseline = "middle";
+            R.fillText(
+                "J",
+                evaluate(CANVAS_WIDTH * 2.5 / 4),
+                evaluate(CANVAS_HEIGHT + MOBILE_CONTROLS_HEIGHT / 2)
+            );
         });
 
         // Button for 'E'
