@@ -579,19 +579,6 @@ class Game {
             shadowedText(value, 20, 30 + 40 + i * 90);
         }));
 
-        
-
-        // Gamepad info
-        R.textAlign = nomangle('right');
-        R.textBaseline = nomangle('alphabetic');
-        R.font = nomangle('18pt Courier');
-        fs('#888');
-        fillText(
-            nomangle('Gamepad: ') + (gamepads().length ? nomangle('yes') : nomangle('no')),
-            evaluate(CANVAS_WIDTH - 20),
-            evaluate(CANVAS_HEIGHT - 20)
-        );
-
         // Intro background
         wrap(() => {
             R.globalAlpha = G.introAlpha;
