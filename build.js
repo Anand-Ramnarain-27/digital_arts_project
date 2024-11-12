@@ -1,6 +1,6 @@
 'use strict';
 
-const compiler = require('./js13k-compiler/src/compiler');
+const compiler = require('./WEB.GL-complier/src/compiler');
 
 const JS_FILES = require('./config/js');
 const CONSTANTS = require('./config/constants');
